@@ -2,7 +2,7 @@ from constants import Orientation
 
 
 class Slide():
-    def __init__(self, image1, image2):
+    def __init__(self, image1, image2=None):
         assert (image1 != None)
         self.image1 = image1
         self.image2 = image2
@@ -11,6 +11,7 @@ class Slide():
                 pass
             else:
                 raise AttributeError("Invalid slide configuration")
+
 
     @property
     def tags(self):
@@ -27,3 +28,11 @@ class Slide():
 
     def __str__(self):
         return "Slide (" + str(self.image1) + "," + str(self.image2) + ")"
+
+    def __eq__(self, other):
+        if(self.image1.id != other.image1.id):#TODO: only checking the first image
+            return False
+        return True
+
+    def __hash__(self):
+        return self.image1.id#TODO: only checking the first one

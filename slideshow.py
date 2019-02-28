@@ -1,11 +1,20 @@
+from Slide import Slide
+
+
 class SlideShow():
-    def __init__(self, slides=[]):
-        self.slides = slides
+    def __init__(self):
+        self.slides= set()
+
+    # def add_slide_ids_to_set(self, slide):
+    #     self.slide_ids.update(set([slide.image1.id]))
+    #     if (slide.image2 != None):
+    #         self.slide_ids.update(set([slide.image2.id]))
 
     def score(self):
         score = 0
+        slides_list = list(self.slides)
         for i in range(1, len(self.slides)):
-            score += len(self.slides[i] - self.slides[i - 1])
+            score += slides_list[i] - slides_list[i - 1]
 
         return score
 
@@ -18,6 +27,11 @@ class SlideShow():
             result += "\n"
         return result
 
-    def add_slide(self, *args):
-        slide = Slide(*args)
-        self.slides.append(slide)
+    def add_slide(self, slide):
+        num_slides = len(self.slides)
+        self.slides.update(set([slide]))
+        if(len(self.slides) != num_slides+1):
+            raise (AttributeError("slide already in slideshow"))
+
+    def pop(self):
+        self.slides.remove(max(self.slides))
