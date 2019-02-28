@@ -2,7 +2,7 @@ from constants import Orientation
 
 
 class Slide():
-    def __init__(self, image1, image2):
+    def __init__(self, image1, image2=None):
         assert (image1 != None)
         self.image1 = image1
         self.image2 = image2
