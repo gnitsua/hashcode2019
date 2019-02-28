@@ -18,3 +18,6 @@ class SlideShow():
                 result += str(slide.image2.id)
             result += "\n"
         return result
+
+    def add_slide(self, slide)
+        self.slides.append(slide)
