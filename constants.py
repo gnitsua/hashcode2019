@@ -6,6 +6,7 @@ class Orientation:
 
 class FilePath:
     data = '/data_sets/'
+    results = '/results/'
     pwd = os.path.dirname(os.path.realpath(__file__))
 
 class InputFile:

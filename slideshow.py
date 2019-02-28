@@ -1,6 +1,5 @@
 from Slide import Slide
 
-
 class SlideShow():
     def __init__(self):
         self.slides= set()
