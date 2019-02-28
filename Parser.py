@@ -28,6 +28,8 @@ class Parser():
             if line_no < InputFile.lines_to_skip:
                 continue
 
+            line = line.replace('\n', '')
+
             data = line.split(' ')
 
             id = line_no - InputFile.lines_to_skip

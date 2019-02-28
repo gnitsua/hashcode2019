@@ -5,3 +5,4 @@ class Image(object):
         self.id = int(id)
         self.orientation = Orientation.horizontal if orientation == 'H' else Orientation.vertical
         self.tags = set(tags)
+        self.number_of_tags = len(tags)
