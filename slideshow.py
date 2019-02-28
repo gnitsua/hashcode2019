@@ -2,7 +2,7 @@ from Slide import Slide
 
 class SlideShow():
     def __init__(self):
-        self.slides= set()
+        self.slides= OrderedSet()
 
     # def add_slide_ids_to_set(self, slide):
     #     self.slide_ids.update(set([slide.image1.id]))
@@ -26,9 +26,13 @@ class SlideShow():
             result += "\n"
         return result
 
+    def add_images(self, *args):
+        slide = Slide(*args)
+        self.add_slide(slide)
+
     def add_slide(self, slide):
         num_slides = len(self.slides)
-        self.slides.update(set([slide]))
+        self.slides.append(slide)
         if(len(self.slides) != num_slides+1):
             raise (AttributeError("slide already in slideshow"))
 

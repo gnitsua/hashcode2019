@@ -3,7 +3,7 @@ from result import Result
 
 from solvers import Solver1 as Solver
 
-file = 'e'
+file = 'c'
 solver_name = 'solver1'
 
 images = Parser.parse(file)

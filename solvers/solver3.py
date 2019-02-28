@@ -38,10 +38,21 @@ class ImageHash():
 
     def hash_images(self):
         image_hash = {}
+        count = 0
 
         for image in self.images:
+            # Limit to only vertical
+            if image.orientation == Orientation.vertical:
+                continue
+
+            # Limit the number of images being used
+            if count >= limit:
+                break
+
             key = '-'.join(sorted(list(image.tags)))
             image_hash[key] = image_hash.get(key, []) + [image]
+
+            count += 1
 
         self.hash = image_hash
 
