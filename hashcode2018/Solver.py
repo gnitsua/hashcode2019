@@ -1,6 +1,4 @@
-import matplotlib.pyplot as plt
-
-from Solution import Solution
+from hashcode2018.Solution import Solution
 
 
 class Solver():

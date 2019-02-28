@@ -1,5 +1,5 @@
-from Map import Map
-from Ride import Ride
+from hashcode2018.Map import Map
+from hashcode2018.Ride import Ride
 class InputFile():
     def __init__(self, filename):
         with open(filename,"r") as file:

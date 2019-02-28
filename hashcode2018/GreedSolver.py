@@ -1,5 +1,5 @@
-from Solver import Solver
-import random
+from hashcode2018.Solver import Solver
+
 
 class GreedySolver(Solver):
     def __init__(self, input_file):

@@ -1,4 +1,4 @@
-import Ride
+from hashcode2018 import Ride
 import matplotlib.pyplot as plt
 
 
@@ -7,7 +7,7 @@ class Solution():
         self.rides = []
         self.map = map
 
-    def addRide(self,ride:Ride):
+    def addRide(self, ride: Ride):
         self.rides.append(ride)
 
     def show(self):
