@@ -9,13 +9,13 @@ if __name__ == "__main__":
     dataset_letter = "b"
     dataset = Parser.parse(dataset_letter)
 
-    with open(dataset_letter+"_distances.txt","r") as file:
+    with open(dataset_letter+"_distances.txt","w") as file:
 
         distance = {}
         for i, image1 in enumerate(dataset):
             for j, image2 in enumerate(dataset):
                 temp_slideshow = SlideShow([image1, image2])
-                file.write("("+str(i), str(j)+"):"+str(temp_slideshow.score()))
+                file.write("("+str(i)+","+ str(j)+"):"+str(temp_slideshow.score())+"\n")
                 # distance["("+str(i), str(j)+")"] = temp_slideshow.score()
                 # datasets[i][j] = (image1.tags,image2.tags)
 
