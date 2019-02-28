@@ -6,7 +6,7 @@ class SlideShow():
     def score(self):
         score = 0
         for i in range(1, len(self.slides)):
-            score += self.slides[i] - self.slides[i - 1]
+            score += len(self.slides[i] - self.slides[i - 1])
 
         return score
 
