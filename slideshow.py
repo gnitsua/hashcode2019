@@ -4,6 +4,7 @@ from Slide import Slide
 
 class SlideShow():
     def __init__(self):
+        self.internal_score = 0
         self.slides= OrderedSet()
 
     # def add_slide_ids_to_set(self, slide):
@@ -12,12 +13,7 @@ class SlideShow():
     #         self.slide_ids.update(set([slide.image2.id]))
 
     def score(self):
-        score = 0
-        slides_list = list(self.slides)
-        for i in range(1, len(self.slides)):
-            score += slides_list[i] - slides_list[i - 1]
-
-        return score
+        return self.internal_score
 
     def __str__(self):
         result = str(len(self.slides)) + "\n"
@@ -37,6 +33,9 @@ class SlideShow():
         self.slides.add(slide)
         if(len(self.slides) != num_slides+1):
             raise (AttributeError("slide already in slideshow"))
+        else:
+            if(len(self.slides) > 1):
+                self.internal_score += self.slides[-1]-self.slides[-2]
 
     def pop(self):
         self.slides.remove(max(self.slides))

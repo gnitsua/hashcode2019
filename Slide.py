@@ -11,6 +11,10 @@ class Slide():
                 pass
             else:
                 raise AttributeError("Invalid slide configuration")
+        else:
+            if(self.image1.orientation == Orientation.vertical):
+                raise AttributeError("Vertical images must be in pairs")
+
 
 
     @property

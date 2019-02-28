@@ -9,3 +9,6 @@ class Image(object):
 
     def __sub__(self, other):
         return self.tags-other.tags
+
+    def __str__(self):
+        return ""+str(self.id)+"("+self.orientation+"): "+str(self.tags)

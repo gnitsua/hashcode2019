@@ -8,13 +8,16 @@ from solvers.solver2 import Solver2
 
 if __name__ == "__main__":
     scores = []
-    for dataset_letter in ["b","c","d","e"]:
-        dataset = Parser.parse(dataset_letter)
 
-        solver = Solver2(dataset)
-        ss = solver.solve()
-        print(ss)
-        scores.append(ss.score())
+    for dataset_letter in ["b","c","d","e"]:
+        with open("results/result_"+dataset_letter+".txt", "w") as file:
+            dataset = Parser.parse(dataset_letter)
+
+            solver = Solver2(dataset)
+            ss = solver.solve()
+            print(ss)
+            file.write(str(ss))
+            scores.append(ss.score())
 
     total = 0
     for score in scores:
