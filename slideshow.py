@@ -19,5 +19,5 @@ class SlideShow():
             result += "\n"
         return result
 
-    def add_slide(self, slide)
+    def add_slide(self, slide):
         self.slides.append(slide)
