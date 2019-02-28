@@ -1,3 +1,5 @@
+from sortedcollections import OrderedSet
+
 from Slide import Slide
 
 class SlideShow():
@@ -32,7 +34,7 @@ class SlideShow():
 
     def add_slide(self, slide):
         num_slides = len(self.slides)
-        self.slides.append(slide)
+        self.slides.add(slide)
         if(len(self.slides) != num_slides+1):
             raise (AttributeError("slide already in slideshow"))
 

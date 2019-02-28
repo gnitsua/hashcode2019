@@ -21,10 +21,10 @@ class Slide():
         return result
 
     def __sub__(self, other):
-        common_tags = self.tags.intersection(other.tags)
-        tags_only_in_1 = self.tags.difference(other.tags)
-        tags_only_in_2 = other.tags.difference(self.tags)
-        return min(len(common_tags), len(tags_only_in_1), len(tags_only_in_2))
+        common_tags = len(self.tags.intersection(other.tags))
+        tags_only_in_1 = len(self.tags)-common_tags
+        tags_only_in_2 = len(other.tags)-common_tags
+        return min(common_tags, tags_only_in_1, tags_only_in_2)
 
     def __str__(self):
         return "Slide (" + str(self.image1) + "," + str(self.image2) + ")"
