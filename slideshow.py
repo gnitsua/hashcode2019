@@ -1,6 +1,5 @@
 class SlideShow():
-    def __init__(self, slides):
-        assert (len(slides) > 1)
+    def __init__(self, slides=[]):
         self.slides = slides
 
     def score(self):
@@ -19,5 +18,6 @@ class SlideShow():
             result += "\n"
         return result
 
-    def add_slide(self, slide):
+    def add_slide(self, *args):
+        slide = Slide(*args)
         self.slides.append(slide)

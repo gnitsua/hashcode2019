@@ -4,7 +4,7 @@ from slideshow import SlideShow
 
 
 class Solver():
-    def __init__(self,dataset):
+    def __init__(self, dataset):
         self.dataset = dataset
 
     def solve(self):
@@ -15,4 +15,4 @@ class Solver():
         slide2 = Slide(test1, test3)
 
         ss = SlideShow([slide,slide2])
-        return ss\
+        return ss
