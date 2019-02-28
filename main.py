@@ -1,5 +1,7 @@
 from Parser import Parser
+from Solver import Solver
 
 if __name__ == "__main__":
-    parser = Parser.parse("a")
-    print(len(parser))
+    dataset = Parser.parse("a")
+    solver = Solver(dataset)
+    print(solver.solve())
