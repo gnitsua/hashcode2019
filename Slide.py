@@ -12,6 +12,7 @@ class Slide():
             else:
                 raise AttributeError("Invalid slide configuration")
 
+
     @property
     def tags(self):
         result = self.image1.tags
@@ -27,3 +28,11 @@ class Slide():
 
     def __str__(self):
         return "Slide (" + str(self.image1) + "," + str(self.image2) + ")"
+
+    def __eq__(self, other):
+        if(self.image1.id != other.image1.id):#TODO: only checking the first image
+            return False
+        return True
+
+    def __hash__(self):
+        return self.image1.id#TODO: only checking the first one
