@@ -42,4 +42,4 @@ class Ride():
         ax.plot(row_steps, col_steps,  'o-',c)
 
     def __str__(self):
-        return "(%i,%i)->(%i,%i)"%(self.start_row,self.start_col,self.end_row,self.end_col)
+        return "%i(%i,%i)->(%i,%i)"%(self.number,self.start_row,self.start_col,self.end_row,self.end_col)

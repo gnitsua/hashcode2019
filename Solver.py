@@ -10,5 +10,6 @@ class Solver():
     def solve(self):
         solution = Solution(self.input_file.map)
         for ride in self.input_file.rides:
+            ride.vehicle = 0
             solution.addRide(ride)
         return solution

@@ -27,8 +27,10 @@ class Solution():
             if(ride.vehicle not in vehicles):
                 vehicles[ride.vehicle] = []
                 vehicles[ride.vehicle].append(ride.number)
-
+            else:
+                vehicles[ride.vehicle].append(ride.number)
+        print(vehicles)
         result = ""
-        for vehicle in vehicles:
-            result = result+" ".join(vehicle)+"\n"
+        for vehicle_number,rides in vehicles.items():
+            result = result+str(vehicle_number)+" "+" ".join(str(x) for x in rides)+"\n"
         return result
