@@ -1,8 +1,8 @@
 from Parser import Parser
 from result import Result
 
-from solvers import Solver1 as Solver
-solver_name = 'solver1'
+from solvers import Solver4 as Solver
+solver_name = 'solver4'
 
 input_keys = ['a', 'b', 'c', 'd', 'e']
 # input_keys = ['e']
