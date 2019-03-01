@@ -1,7 +1,8 @@
 from BaseSolver import Solver
 from slideshow import SlideShow
+from constants import Orientation
 
-class Solver1(Solver):
+class Solver3(Solver):
     def solve(self):
         slideshow = SlideShow()
 
@@ -11,7 +12,7 @@ class Solver1(Solver):
         # Pick random first image
         current_image = image_hash.get_random_image()
 
-        slideshow.add_slide(current_image, None)
+        slideshow.add_images(current_image)
 
         # Pick the rest of the slides
         while image_hash.len > 0:
@@ -23,7 +24,10 @@ class Solver1(Solver):
             else:
                 next_image = image_hash.get_random_image()
 
-            slideshow.add_slide(next_image, None)
+            if next_image is None:  # Hack for inability to count
+                break
+
+            slideshow.add_images(next_image)
 
             current_image = next_image
             current_key = next_key
@@ -38,11 +42,12 @@ class ImageHash():
 
     def hash_images(self):
         image_hash = {}
+        limit = 10000
         count = 0
 
         for image in self.images:
-            # Limit to only vertical
-            if image.orientation == Orientation.vertical:
+            # Limit to only horizontal (1 per page)
+            if image.orientation != Orientation.horizontal:
                 continue
 
             # Limit the number of images being used
@@ -76,8 +81,15 @@ class ImageHash():
         return image
 
     def get_random_image(self):
-        random_key = self.keys().pop()
-        return self.get_image(random_key)
+        keys = self.keys()
+
+        if keys:
+            random_key = keys.pop()
+            image = self.get_image(random_key)
+        else:
+            image = None
+
+        return image
 
     def get_potential_next(self, tags):
         # Return keys that contain at least one of the provided tags
