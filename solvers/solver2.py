@@ -19,14 +19,14 @@ class Solver2(Solver):
         ss.add_slide(Slide(starting_node))
         # ss.add_slide(Slide(second_node))
 
-        while(len(ss.slides) < 1000 and len(ss.slides) < len(self.dataset)*0.4):
+        while(len(ss.slides) < 600):
             self.add_slide(ss)
         return ss
 
 
 
     def add_slide(self, slideshow):
-        options = set([random.randint(0,len(self.dataset)-1) for _ in range(1)])
+        options = set([random.randint(0,len(self.dataset)-1) for _ in range(5)])
 
         max = 0
         for option in options:

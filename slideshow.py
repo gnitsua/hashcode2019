@@ -38,4 +38,5 @@ class SlideShow():
                 self.internal_score += self.slides[-1]-self.slides[-2]
 
     def pop(self):
+        self.internal_score -= self.slides[-1] - self.slides[-2]
         self.slides.remove(max(self.slides))
