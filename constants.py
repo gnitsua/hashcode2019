@@ -29,3 +29,9 @@ class DatasetLetter:
     @classmethod
     def __iter__(cls):
         return [cls.A, cls.B, cls.C, cls.D, cls.E].__iter__()
+
+
+class RedisKey:
+    @staticmethod
+    def score_container(dataset_letter):
+        return 'score-{}'.format(dataset_letter)

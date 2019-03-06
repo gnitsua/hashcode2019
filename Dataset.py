@@ -28,7 +28,3 @@ class Dataset(list):
             return self[index]
         else:
             raise IOError("image is not currently free")
-
-    @staticmethod
-    def get_dataset_score_container_key(dataset_letter):
-        return "score-" + dataset_letter
