@@ -1,4 +1,5 @@
 from constants import Orientation
+from image import Image
 
 
 class Slide():
@@ -12,10 +13,20 @@ class Slide():
             else:
                 raise AttributeError("Invalid slide configuration")
         else:
-            if(self.image1.orientation == Orientation.vertical):
+            if (self.image1.orientation == Orientation.vertical):
                 raise AttributeError("Vertical images must be in pairs")
 
-
+    @classmethod
+    def fromString(cls, string, dataset):
+        images = []
+        for image in string.split(" "):
+            images.append(Image.fromString(image, dataset))
+        if (len(images) == 2):
+            return Slide(images[0], images[1])
+        elif (len(images) == 1):
+            return Slide(images[0])
+        else:
+            raise AssertionError("not the right number of slides")
 
     @property
     def tags(self):
@@ -26,17 +37,23 @@ class Slide():
 
     def __sub__(self, other):
         common_tags = len(self.tags.intersection(other.tags))
-        tags_only_in_1 = len(self.tags)-common_tags
-        tags_only_in_2 = len(other.tags)-common_tags
+        tags_only_in_1 = len(self.tags) - common_tags
+        tags_only_in_2 = len(other.tags) - common_tags
         return min(common_tags, tags_only_in_1, tags_only_in_2)
 
     def __str__(self):
         return "Slide (" + str(self.image1) + "," + str(self.image2) + ")"
 
     def __eq__(self, other):
-        if(self.image1.id != other.image1.id):#TODO: only checking the first image
+        if (self.image1.id != other.image1.id):  # TODO: only checking the first image
             return False
         return True
 
     def __hash__(self):
-        return self.image1.id#TODO: only checking the first one
+        return self.image1.id  # TODO: only checking the first one
+
+    def __iter__(self):
+        result = [self.image1]
+        if(self.image2):
+            result.append(self.image2)
+        return result.__iter__()

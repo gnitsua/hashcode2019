@@ -14,13 +14,14 @@ class Solver2(Solver):
         while(starting_node.orientation != Orientation.horizontal):
             starting_node = self.dataset[random.randint(0, len(self.dataset) - 1)]
 
-        ss = SlideShow()
+        ss = SlideShow(self.dataset.dataset_letter)
         # print(starting_node)
         ss.add_slide(Slide(starting_node))
         # ss.add_slide(Slide(second_node))
-
-        while(len(ss.slides) < 600):
+        while(len(ss.slides) < 2):
             self.add_slide(ss)
+
+        ss.finalize()
         return ss
 
 
@@ -32,7 +33,7 @@ class Solver2(Solver):
         for option in options:
             try:
                 slideshow.add_slide(Slide(self.dataset[option]))
-                score = slideshow.score()
+                score = slideshow.get_score()
 
                 if(score > max):
                     max = score

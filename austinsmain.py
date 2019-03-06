@@ -1,5 +1,6 @@
 import numpy as np
 
+from Dataset import Dataset
 from Parser import Parser
 from slideshow import SlideShow
 from solvers.solver2 import Solver2
@@ -9,15 +10,21 @@ from solvers.solver2 import Solver2
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["b","c","d","e"]:
+    for dataset_letter in ["a"]:
         with open("results/result_"+dataset_letter+".txt", "w") as file:
-            dataset = Parser.parse(dataset_letter)
+            dataset = Dataset(dataset_letter)
 
             solver = Solver2(dataset)
-            ss = solver.solve()
+            while(True):
+                try:
+                    ss = solver.solve()
+                    break
+                except AttributeError as e:
+                    print("redis rejected solution")
+
             print(ss)
             file.write(str(ss))
-            scores.append(ss.score())
+            scores.append(ss.get_score())
 
     total = 0
     for score in scores:
