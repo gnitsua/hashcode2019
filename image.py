@@ -7,7 +7,6 @@ class Image(object):
         self.orientation = Orientation.horizontal if orientation == 'H' else Orientation.vertical
         self.tags = set(tags)
         self.number_of_tags = len(tags)
-        self.database_letter = None
 
     @classmethod
     def fromString(cls, string, dataset):
@@ -26,8 +25,7 @@ class Image(object):
         return self.tags - other.tags
 
     def __hash__(self):
-        assert (self.database_letter != None)
-        return "" + self.database_letter + "-" + str(self.id)
+        return str(self.id)
 
     def __str__(self):
         return "" + str(self.id) + "(" + self.orientation + "): " + str(self.tags)

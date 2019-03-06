@@ -1,4 +1,5 @@
 import random
+import time
 
 from Slide import Slide
 from constants import Orientation
@@ -10,36 +11,39 @@ class Solver2(Solver):
     def solve(self):
         random.seed()
 
-        starting_node = self.dataset[random.randint(0, len(self.dataset)-1)]
+        starting_node = self.dataset.get()
         while(starting_node.orientation != Orientation.horizontal):
-            starting_node = self.dataset[random.randint(0, len(self.dataset) - 1)]
+            starting_node = self.dataset.get()
+
+        second_node = self.dataset.get()
+        while (second_node.orientation != Orientation.horizontal and second_node != starting_node):
+            second_node = self.dataset.get()
 
         ss = SlideShow(self.dataset.dataset_letter)
         # print(starting_node)
         ss.add_slide(Slide(starting_node))
-        # ss.add_slide(Slide(second_node))
-        while(len(ss.slides) < 2):
+        ss.add_slide(Slide(second_node))
+
+        start = time.time()
+        while(time.time() - start < 15):
             self.add_slide(ss)
 
-        ss.finalize()
+        self.validate(ss)
         return ss
 
 
 
     def add_slide(self, slideshow):
-        options = set([random.randint(0,len(self.dataset)-1) for _ in range(5)])
-
-        max = 0
-        for option in options:
+        max_score = 0
+        for _ in range(5):
             try:
-                slideshow.add_slide(Slide(self.dataset[option]))
+                random_slide = self.dataset.get(safeness=0)
+                slideshow.add_slide(Slide(random_slide))
                 score = slideshow.get_score()
-
-                if(score > max):
-                    max = score
+                if(score > max_score):
+                    max_score = score
                 else:
                     slideshow.pop()
             except AttributeError as e:
-                pass
-                # print("invalid slideshow ("+e.message)+")"
+                print("invalid slideshow ("+e.message)+")"
 

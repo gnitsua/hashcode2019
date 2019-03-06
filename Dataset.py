@@ -1,30 +1,75 @@
+import random
+
 import redis
+import regex as regex
 
 from Parser import Parser
-from constants import UNASSIGNED_IMAGE, REDIS_HOST, REDIS_PASWORD
+from constants import REDIS_HOST, REDIS_PASWORD, RedisKey
+
+random.seed()
 
 
-class Dataset(list):
-    def __init__(self, dataset_letter):
+class Dataset():
+    def __init__(self, dataset_letter, start_fresh=False):
         self.dataset_letter = dataset_letter
-        super(Dataset, self).__init__()
-        self.r = redis.Redis(host=REDIS_HOST,password=REDIS_PASWORD)
-
-        for image in Parser.parse(dataset_letter):
-            image.set_database_letter(self.dataset_letter)
-            self.append(image)
-
-    def append(self, image):
-        super(Dataset, self).append(image)
-        image_key = image.__hash__()  # lets make sure that it is in redis
-        if (self.r.get(image_key) == None):
-            print("image not in redis, adding (" + image_key + ")")
-            self.r.set(image_key, UNASSIGNED_IMAGE)
-
-    def get_safe(self, index):
-        currently_assigned_to = self.r.get(self[index].__hash__())
-        assert (currently_assigned_to == None)  # hopefully it hasn't somehow disappeared from redis
-        if (currently_assigned_to == UNASSIGNED_IMAGE):
-            return self[index]
+        self.images = Parser.parse(dataset_letter)
+        self.r = redis.Redis(host=REDIS_HOST, password=REDIS_PASWORD)
+        if (start_fresh == True):
+            self.flush_associated_keys()
+        if (self.r.exists(self.dataset_letter) == 0):  # dataset doesn't currently exist in redis
+            print("dataset not in redis")
+            self.r.sadd(dataset_letter, *map(lambda image: image.__hash__(), self.images))
+            self.r.bgsave()
         else:
-            raise IOError("image is not currently free")
+            print("dataset already in redis")
+
+    def flush_associated_keys(self):
+        for key in self.r.scan_iter(match=self.dataset_letter + "*"):
+            self.r.delete(key)
+
+    def remove_slide_show(self, id):
+        assert (regex.match("^.ss", id))
+        pipe = self.r.pipeline()
+        pipe.zrem(RedisKey.score_container(self.dataset_letter),
+                  RedisKey.slideshow(self.dataset_letter, id))  # remove the entry from the score board
+        pipe.delete(RedisKey.slide_container(self.dataset_letter, RedisKey.slideshow(self.dataset_letter,
+                                                                                     id)))  # remove entry for the slide container
+        pipe.sunionstore(RedisKey.unused_images_container(self.dataset_letter),
+                         RedisKey.unused_images_container(self.dataset_letter),
+                         RedisKey.slideshow(self.dataset_letter, id))
+        pipe.delete(RedisKey.slideshow(self.dataset_letter, id))
+        pipe.execute()
+
+    def get(self, safeness=1):
+        """
+        Get a random member of the dataset
+        :return: random Image() from dataset
+        """
+        if (random.random() > safeness):
+            random_image_number = random.randint(0,len(self.images)-1) #for unsafe gets, don't consult redis
+        else:
+            set_to_pull_from = self.dataset_letter
+            random_image_number = self.r.srandmember(set_to_pull_from)
+        assert (random_image_number != None)
+        return self.images[int(random_image_number)]
+
+    def find_image(self, image):  # TODO: add memoization
+        for set in self.r.scan_iter(
+                match=self.dataset_letter + "*"):  # TODO: can we just iterate through the scoreboard?
+            if(self.r.type(set) == "set"):
+                if (self.r.sismember(set, image.id)):
+                    return set
+        raise AssertionError("never found image (" + image.id + ")")
+
+    def get_slideshow_score(self, slide_show):
+        return self.r.zscore(RedisKey.score_container(self.dataset_letter), slide_show)
+
+    def create_slideshow(self, slide_show):
+        pipe = self.r.pipeline()
+        pipe.set(RedisKey.slide_container(self.dataset_letter, slide_show.id),
+                 slide_show.__str__())  # create the slide container
+        print(RedisKey.slide_container(self.dataset_letter, slide_show.id))
+        pipe.zadd(RedisKey.score_container(self.dataset_letter), {RedisKey.slideshow(self.dataset_letter, slide_show.id):slide_show.get_score()})  # add entry to scoreboard
+        images = slide_show.get_images()
+        pipe.sadd(RedisKey.slideshow(self.dataset_letter, slide_show.id), *map(lambda image: image.__hash__(), images))
+        pipe.execute()

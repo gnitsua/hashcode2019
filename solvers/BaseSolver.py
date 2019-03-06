@@ -1,4 +1,5 @@
 from Slide import Slide
+from constants import RedisKey
 from image import Image
 from slideshow import SlideShow
 
@@ -14,5 +15,38 @@ class Solver():
         slide = Slide(test1, test2)
         slide2 = Slide(test1, test3)
 
-        ss = SlideShow([slide,slide2])
+        ss = SlideShow([slide, slide2])
         return ss
+
+    def validate(self, slideshow):
+        score = slideshow.get_score()
+
+        #figure out which slideshows would need to die
+        slideshows_to_kill = set()
+        for image in slideshow.get_images():
+            slideshows_to_kill.add(self.dataset.find_image(image))
+
+        print("Slideshows to kill {}".format(slideshows_to_kill))
+
+        #figure out if we should kill them
+        for slideshow_to_kill in slideshows_to_kill:
+            slide_show_score = self.dataset.get_slideshow_score(slideshow_to_kill)
+
+            if(slide_show_score > score):
+                raise AttributeError("Slide currently in use by a slideshow with a higher score")
+
+        print("it's valid")
+
+        #so let's kill those slide shows
+        for slideshow_to_kill in slideshows_to_kill:
+            if (slideshow_to_kill == RedisKey.unused_images_container(self.dataset.dataset_letter)):
+                pass #don't actually remove the unused_images container
+            else:
+                self.dataset.remove_slide_show(slideshow_to_kill)
+
+        self.dataset.create_slideshow(slideshow)
+
+
+
+
+

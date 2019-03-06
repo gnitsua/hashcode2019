@@ -10,17 +10,18 @@ from solvers.solver2 import Solver2
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["a"]:
+    for dataset_letter in ["c"]:
         with open("results/result_"+dataset_letter+".txt", "w") as file:
-            dataset = Dataset(dataset_letter)
+            # dataset = Dataset(dataset_letter,start_fresh=True)
+            dataset = Dataset(dataset_letter,start_fresh=False)
 
             solver = Solver2(dataset)
             while(True):
-                try:
+                # try:
                     ss = solver.solve()
                     break
-                except AttributeError as e:
-                    print("redis rejected solution")
+                # except AttributeError as e:
+                #     print("redis rejected solution {}".format(e.message))
 
             print(ss)
             file.write(str(ss))
