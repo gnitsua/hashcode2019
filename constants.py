@@ -37,3 +37,8 @@ with open('config.json', 'r') as f:
 
 REDIS_HOST = config["REDIS_HOST"]
 REDIS_PASWORD = config["REDIS_PASS"]
+
+class RedisKey:
+    @staticmethod
+    def score_container(dataset_letter):
+        return 'score-{}'.format(dataset_letter)

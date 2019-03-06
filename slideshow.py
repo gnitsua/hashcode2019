@@ -3,11 +3,11 @@ import uuid
 import redis
 from sortedcollections import OrderedSet
 
-from Dataset import Dataset
 from Slide import Slide
-from constants import UNASSIGNED_IMAGE
 from constants import REDIS_HOST
 from constants import REDIS_PASWORD
+from constants import UNASSIGNED_IMAGE, RedisKey
+
 
 class SlideShow():
     def __init__(self, dataset_letter, id=None):
@@ -28,7 +28,7 @@ class SlideShow():
 
     @classmethod
     def getFromRedis(cls, id, dataset):
-        r = redis.Redis(host=REDIS_HOST,password=REDIS_PASWORD)
+        r = redis.Redis(host=REDIS_HOST, password=REDIS_PASWORD)
         ss = r.get(id)
         if (ss != None):
             raise KeyError("Slide show not found")
@@ -59,7 +59,7 @@ class SlideShow():
     def finalize(self):
         # since the slides have all been added we can assume that it is valid by the rules
         # so let's just check if it is valid based on the redis state
-        r = redis.Redis(host=REDIS_HOST,password=REDIS_PASWORD)
+        r = redis.Redis(host=REDIS_HOST, password=REDIS_PASWORD)
         score = self.get_score()
         slide_shows_that_would_need_to_die = set()
         for slide in self.slides:
@@ -78,7 +78,7 @@ class SlideShow():
         print("Slideshows that would need to die" + str(slide_shows_that_would_need_to_die))
 
         for slide_show_that_would_need_to_die in slide_shows_that_would_need_to_die:
-            slide_show_score = r.zscore(Dataset.get_dataset_score_container_key(self.dataset_letter),
+            slide_show_score = r.zscore(RedisKey.score_container(self.dataset_letter),
                                         slide_show_that_would_need_to_die)
             # this would only happen if the slideshow was deleted between the last check and this?
             assert (slide_show_score != None)
@@ -92,9 +92,9 @@ class SlideShow():
 
         # TODO: lock through this section
         # add this slideshow's score to the scoreboard
-        print("Adding: " + Dataset.get_dataset_score_container_key(self.dataset_letter) + "," + self.id + "=" + str(
+        print("Adding: " + RedisKey.score_container(self.dataset_letter) + "," + self.id + "=" + str(
             score))
-        r.zadd(Dataset.get_dataset_score_container_key(self.dataset_letter), {self.id: score})
+        r.zadd(RedisKey.score_container(self.dataset_letter), {self.id: score})
         # set the lock for all of the images to this slideshow
         for slide in self.slides:
             for image in slide:
@@ -104,7 +104,7 @@ class SlideShow():
         # and kill the competeing slideshows
         for slide_show_to_kill in slide_shows_that_would_need_to_die:
             print("Removing: " + slide_show_to_kill)
-            r.zrem(Dataset.get_dataset_score_container_key(self.dataset_letter), slide_show_to_kill)
+            r.zrem(RedisKey.score_container(self.dataset_letter), slide_show_to_kill)
 
         # finally broadcast the slide show so others can find it
         r.set(self.id, self.__str__())
