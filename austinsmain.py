@@ -1,39 +1,28 @@
-import numpy as np
-
 from Dataset import Dataset
-from Parser import Parser
-from slideshow import SlideShow
-from solvers.solver2 import Solver2
+from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
 
 # import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["c"]:
-        with open("results/result_"+dataset_letter+".txt", "w") as file:
-            # dataset = Dataset(dataset_letter,start_fresh=True)
-            dataset = Dataset(dataset_letter,start_fresh=False)
+    for dataset_letter in ["d"]:
 
-            solver = Solver2(dataset)
-            while(True):
-                # try:
-                    ss = solver.solve()
-                    break
-                # except AttributeError as e:
-                #     print("redis rejected solution {}".format(e.message))
+        # dataset = Dataset(dataset_letter,start_fresh=True)
+        dataset = Dataset(dataset_letter, start_fresh=True)
 
-            print(ss)
-            file.write(str(ss))
+        solver = SlideShowInjectorSolver(dataset)
+        ss = solver.solve()
+        if (ss != None):
             scores.append(ss.get_score())
+            with open("results/result-" + dataset_letter + "-" + str(ss.get_score()) + ".txt", "w") as file:
+                file.write(str(ss))
 
     total = 0
     for score in scores:
-        print("Score:"+str(score))
+        print("Score:" + str(score))
         total += score
     print(total)
-
-
 
     # with open(dataset_letter+"_distances.txt","w") as file:
     #
@@ -44,10 +33,6 @@ if __name__ == "__main__":
     #             file.write("("+str(i)+","+ str(j)+"):"+str(temp_slideshow.score())+"\n")
     #             # distance["("+str(i), str(j)+")"] = temp_slideshow.score()
     #             # datasets[i][j] = (image1.tags,image2.tags)
-
-
-
-
 
     # np.save("distance" + dataset_letter + ".npy", distance)
     # print(distance)

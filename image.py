@@ -11,8 +11,8 @@ class Image(object):
     @classmethod
     def fromString(cls, string, dataset):
         try:
-            string_as_int = int(string[2:])  # skip the "databaseletter-"
-            return dataset[string_as_int]
+            string_as_int = int(string)  # skip the "databaseletter-"
+            return dataset.images[string_as_int]
         except ValueError as e:
             raise e
         except IndexError as e:
@@ -25,7 +25,10 @@ class Image(object):
         return self.tags - other.tags
 
     def __hash__(self):
-        return str(self.id)
+        return self.id
 
-    def __str__(self):
-        return "" + str(self.id) + "(" + self.orientation + "): " + str(self.tags)
+    def __str__(self, pretty=False):
+        if (pretty == True):
+            return "" + str(self.id) + "(" + self.orientation + "): " + str(self.tags)
+        else:
+            return str(self.id)

@@ -19,7 +19,7 @@ class Slide():
     @classmethod
     def fromString(cls, string, dataset):
         images = []
-        for image in string.split(" "):
+        for image in string.rstrip().split(" "):
             images.append(Image.fromString(image, dataset))
         if (len(images) == 2):
             return Slide(images[0], images[1])
@@ -41,8 +41,11 @@ class Slide():
         tags_only_in_2 = len(other.tags) - common_tags
         return min(common_tags, tags_only_in_1, tags_only_in_2)
 
-    def __str__(self):
-        return "Slide (" + str(self.image1) + "," + str(self.image2) + ")"
+    def __str__(self, pretty=False):
+        if (pretty == True):
+            return "Slide (" + str(self.image1) + "," + str(self.image2) + ")"
+        else:
+            return " ".join(map(str, list(self.__iter__())))  # TODO: this is ugl
 
     def __eq__(self, other):
         if (self.image1.id != other.image1.id):  # TODO: only checking the first image
@@ -54,6 +57,6 @@ class Slide():
 
     def __iter__(self):
         result = [self.image1]
-        if(self.image2):
+        if (self.image2):
             result.append(self.image2)
         return result.__iter__()
