@@ -10,7 +10,7 @@ from solvers.solver2 import Solver2
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["a"]:
+    for dataset_letter in ["b"]:
         with open("results/result_"+dataset_letter+".txt", "w") as file:
             dataset = Dataset(dataset_letter)
 
