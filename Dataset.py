@@ -1,14 +1,14 @@
 import redis
 
 from Parser import Parser
-from constants import UNASSIGNED_IMAGE
+from constants import UNASSIGNED_IMAGE, REDIS_HOST, REDIS_PASWORD
 
 
 class Dataset(list):
     def __init__(self, dataset_letter):
         self.dataset_letter = dataset_letter
         super(Dataset, self).__init__()
-        self.r = redis.Redis(host="192.168.99.100")
+        self.r = redis.Redis(host=REDIS_HOST,password=REDIS_PASWORD)
 
         for image in Parser.parse(dataset_letter):
             image.set_database_letter(self.dataset_letter)

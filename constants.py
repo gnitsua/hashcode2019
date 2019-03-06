@@ -1,3 +1,4 @@
+import json
 import os
 
 
@@ -29,3 +30,10 @@ class DatasetLetter:
     @classmethod
     def __iter__(cls):
         return [cls.A, cls.B, cls.C, cls.D, cls.E].__iter__()
+
+
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
+REDIS_HOST = config["REDIS_HOST"]
+REDIS_PASWORD = config["REDIS_PASS"]

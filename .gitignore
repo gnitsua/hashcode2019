@@ -118,3 +118,5 @@ dmypy.json
 .idea/
 results/
 **.zip
+config.json
+b_distances.txt

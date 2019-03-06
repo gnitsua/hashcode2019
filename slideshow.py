@@ -6,7 +6,8 @@ from sortedcollections import OrderedSet
 from Dataset import Dataset
 from Slide import Slide
 from constants import UNASSIGNED_IMAGE
-
+from constants import REDIS_HOST
+from constants import REDIS_PASWORD
 
 class SlideShow():
     def __init__(self, dataset_letter, id=None):
@@ -27,7 +28,7 @@ class SlideShow():
 
     @classmethod
     def getFromRedis(cls, id, dataset):
-        r = redis.Redis(host="192.168.99.100")
+        r = redis.Redis(host=REDIS_HOST,password=REDIS_PASWORD)
         ss = r.get(id)
         if (ss != None):
             raise KeyError("Slide show not found")
@@ -58,7 +59,7 @@ class SlideShow():
     def finalize(self):
         # since the slides have all been added we can assume that it is valid by the rules
         # so let's just check if it is valid based on the redis state
-        r = redis.Redis(host="192.168.99.100")
+        r = redis.Redis(host=REDIS_HOST,password=REDIS_PASWORD)
         score = self.get_score()
         slide_shows_that_would_need_to_die = set()
         for slide in self.slides:
