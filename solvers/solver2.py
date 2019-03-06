@@ -11,21 +11,16 @@ class Solver2(Solver):
     def solve(self):
         random.seed()
 
-        starting_node = self.dataset.get()
+        starting_node = self.dataset.get(safeness=0.5)
         while(starting_node.orientation != Orientation.horizontal):
             starting_node = self.dataset.get()
-
-        second_node = self.dataset.get()
-        while (second_node.orientation != Orientation.horizontal and second_node != starting_node):
-            second_node = self.dataset.get()
 
         ss = SlideShow(self.dataset.dataset_letter)
         # print(starting_node)
         ss.add_slide(Slide(starting_node))
-        ss.add_slide(Slide(second_node))
 
         start = time.time()
-        while(time.time() - start < 15):
+        while(time.time() - start < 5):
             self.add_slide(ss)
 
         self.validate(ss)
