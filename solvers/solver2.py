@@ -11,7 +11,7 @@ class Solver2(Solver):
     def solve(self):
         random.seed()
 
-        starting_node = self.dataset.get(safeness=0.5)
+        starting_node = self.dataset.get(safeness=0.8)
         while(starting_node.orientation != Orientation.horizontal):
             starting_node = self.dataset.get()
 
@@ -20,7 +20,7 @@ class Solver2(Solver):
         ss.add_slide(Slide(starting_node))
 
         start = time.time()
-        while(time.time() - start < 5):
+        while(time.time() - start < 15):
             self.add_slide(ss)
 
         self.validate(ss)

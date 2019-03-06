@@ -6,8 +6,10 @@ from constants import DatasetLetter, RedisKey, REDIS_HOST, REDIS_PASWORD
 
 
 class RedisScoreboardMoniter():
-    def __init__(self):
+    def __init__(self,clear=False):
         self.r = redis.Redis(host=REDIS_HOST, password=REDIS_PASWORD)
+        if(clear == True):
+            self.r.flushall()
 
     def run(self):
         while (True):

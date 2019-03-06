@@ -56,67 +56,15 @@ class SlideShow():
         self.internal_score -= self.slides[-1] - self.slides[-2]
         self.slides.remove(max(self.slides))
 
-    # def finalize(self):
-    #     # since the slides have all been added we can assume that it is valid by the rules
-    #     # so let's just check if it is valid based on the redis state
-    #     r = redis.Redis(host=REDIS_HOST, password=REDIS_PASWORD)
-    #     score = self.get_score()
-    #     slide_shows_that_would_need_to_die = set()
-    #     for slide in self.slides:
-    #         for image in slide:
-    #             currently_assigned_to = r.get(image.__hash__())
-    #             print(image.__hash__(), currently_assigned_to)
-    #             assert (currently_assigned_to != None)  # again we are hoping that images are never not in the database
-    #             if (currently_assigned_to == UNASSIGNED_IMAGE):
-    #                 pass  # this is a valid image to have in this slideshow
-    #             elif (currently_assigned_to == self.id):
-    #                 pass  # if we are working inside
-    #             else:
-    #                 # slide show that would need to be deleted to allow this one to be valid
-    #                 slide_shows_that_would_need_to_die.add(currently_assigned_to)
-    #
-    #     print("Slideshows that would need to die" + str(slide_shows_that_would_need_to_die))
-    #
-    #     for slide_show_that_would_need_to_die in slide_shows_that_would_need_to_die:
-    #         slide_show_score = r.zscore(RedisKey.score_container(self.dataset_letter),
-    #                                     slide_show_that_would_need_to_die)
-    #         # this would only happen if the slideshow was deleted between the last check and this?
-    #         if (slide_show_score == None):
-    #             self.r.set()  # this lock refers to a zombie lock, so we can release it
-    #
-    #         elif (slide_show_score > score):
-    #             raise AttributeError("another slide show is using this slide (and has a higher score)")
-    #         else:
-    #             pass  # this slide show will have a higher score than that one, so we can delete that one (but not yet, make sure the others are valid first)
-    #
-    #     # if we have made it this far, the slideshow is valid, time to post it
-    #     print("it's valid")
-    #
-    #     # TODO: lock through this section
-    #     # add this slideshow's score to the scoreboard
-    #     print("Adding: " + RedisKey.score_container(self.dataset_letter) + "," + self.id + "=" + str(
-    #         score))
-    #     r.zadd(RedisKey.score_container(self.dataset_letter), {self.id: score})
-    #     # set the lock for all of the images to this slideshow
-    #     for slide in self.slides:
-    #         for image in slide:
-    #             print(str(image.__hash__()) + "=" + str(self.id))
-    #             r.set(image.__hash__(), self.id)
-    #
-    #     # and kill the competeing slideshows
-    #     for slide_show_to_kill in slide_shows_that_would_need_to_die:
-    #         print("Removing: " + slide_show_to_kill)
-    #         r.zrem(RedisKey.score_container(self.dataset_letter), slide_show_to_kill)
-    #
-    #     # finally broadcast the slide show so others can find it
-    #     r.set(self.id, self.__str__())
-
     def get_images(self):
         result = []
         for slide in self.slides:
             for image in slide:
                 result.append(image)
         return result
+
+    def get_image_ids(self):
+        return map(lambda image: image.__hash__(), self.get_images())
 
     def __str__(self):
         result = str(len(self.slides)) + "\n"

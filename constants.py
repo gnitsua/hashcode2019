@@ -41,16 +41,20 @@ REDIS_PASWORD = config["REDIS_PASS"]
 class RedisKey:
     @staticmethod
     def score_container(dataset_letter):
-        return '{}score'.format(dataset_letter)
+        return '{}-score'.format(dataset_letter)
 
     @staticmethod
     def slide_container(dataset_letter,slideshow_id):
-        return '{}slides{}'.format(dataset_letter,slideshow_id)
+        return '{}-slides-{}'.format(dataset_letter,slideshow_id)
 
     @staticmethod
     def slideshow(dataset_letter,id):
-        return '{}ss{}'.format(dataset_letter,id)
+        return '{}-ss-{}'.format(dataset_letter,id)
 
     @staticmethod
     def unused_images_container(dataset_letter):
         return dataset_letter
+
+    @staticmethod
+    def temp_slideshow(id):
+        return 'temp-ss{}'.format(id)
