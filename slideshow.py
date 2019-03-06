@@ -71,6 +71,10 @@ class SlideShow():
     def get_image_ids(self):
         return map(lambda image: image.__hash__(), self.get_images())
 
+    def save_to_file(self,filepath = "results/"):
+        with open(filepath+"result-" + self.dataset_letter + "-"+str(self.get_score())+".txt", "w") as file:
+            file.write(str(self))
+
     def __str__(self, pretty=False):
         result = str(len(self.slides)) + "\n"
         for slide in self.slides:

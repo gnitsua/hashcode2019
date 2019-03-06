@@ -59,3 +59,7 @@ class RedisKey:
     @staticmethod
     def temp_slideshow(id):
         return 'temp-ss{}'.format(id)
+
+    @staticmethod
+    def unused_images_sentinal(dataset_letter):  # Needed because redis deletes empty sets
+        return "{}-sentinal".format(dataset_letter)

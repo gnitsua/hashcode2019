@@ -24,17 +24,18 @@ class RedisScoreboardMoniter():
                     self.write_top_scores_to_file(dataset_letter, top_five[0][0], top_five[0][1])
                 else:
                     print("no scores yet")
+                print("Unused items: {}".format(self.r.scard(RedisKey.unused_images_container(dataset_letter))))
             print("Total best score {}".format(topscore))
 
             time.sleep(15)
 
     def write_top_scores_to_file(self, dataset_letter, slideshow_id, score):
-        with open("results/result_" + dataset_letter + "-" + str(int(score)) + ".txt", "w") as file:
+        with open("results/backup/result-" + dataset_letter + "-" + str(int(score)) + ".txt", "w") as file:
             ss = self.r.get(RedisKey.slide_container(dataset_letter, slideshow_id[5:]))
             assert (ss != None)
-            file.write(str(ss))
+            file.write(str(ss))# dont' bother parsing it, just write it
 
 
 if __name__ == "__main__":
-    scoreboard_moniter = RedisScoreboardMoniter()
+    scoreboard_moniter = RedisScoreboardMoniter(clear=False)
     scoreboard_moniter.run()

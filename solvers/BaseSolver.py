@@ -1,5 +1,4 @@
 from Slide import Slide
-from constants import RedisKey
 from image import Image
 from slideshow import SlideShow
 
@@ -21,30 +20,24 @@ class Solver():
     def validate(self, slideshow):
         score = slideshow.get_score()
 
-        #figure out which slideshows would need to die
+        # figure out which slideshows would need to die
         slideshows_to_kill = self.dataset.find_intersections(slideshow)
 
         print("Slideshows to kill {}".format(slideshows_to_kill))
 
-        #figure out if we should kill them
+        # figure out if we should kill them
         for slideshow_to_kill in slideshows_to_kill:
             slide_show_score = self.dataset.get_slideshow_score(slideshow_to_kill)
 
-            if(slide_show_score > score):
-                raise AttributeError("Slide currently in use by a slideshow with a higher score ({}>{})".format(slide_show_score,score))
+            if (slide_show_score > score):
+                raise AttributeError(
+                    "Slide currently in use by a slideshow with a higher score ({}>{})".format(slide_show_score, score))
 
-        print("it's valid")
 
-        #so let's kill those slide shows
+        print("Adding {}".format(slideshow.id))
+
+        # so let's kill those slide shows
         for slideshow_to_kill in slideshows_to_kill:
-            if (slideshow_to_kill == RedisKey.unused_images_container(self.dataset.dataset_letter)):
-                pass #don't actually remove the unused_images container
-            else:
-                self.dataset.remove_slide_show(slideshow_to_kill)#TODO does this need to be atomic
+            self.dataset.remove_slide_show(slideshow_to_kill)#TODO does this need to be atomic
 
         self.dataset.create_slideshow(slideshow)
-
-
-
-
-
