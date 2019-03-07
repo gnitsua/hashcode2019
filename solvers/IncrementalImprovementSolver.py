@@ -6,6 +6,7 @@ from ortools.constraint_solver import routing_enums_pb2
 from constants import RedisKey
 from slideshow import SlideShow
 from solvers.BaseSolver import Solver
+from constants import MAX_NUMBER_OF_TAGS
 
 
 class IncrementalImprovementSolver(Solver):
@@ -13,7 +14,7 @@ class IncrementalImprovementSolver(Solver):
 
     def get_solution_to_work_on(self):
         ss_ids = self.dataset.r.zrange(RedisKey.score_container(self.dataset.dataset_letter), 0, 5, withscores=True,
-                                      desc=True)
+                                       desc=True)
         ss_id = random.choice(ss_ids)
         assert (ss_id != None)
         slide_show_string = self.dataset.r.get(RedisKey.slide_container(self.dataset.dataset_letter, ss_id[0][5:]))
@@ -24,7 +25,7 @@ class IncrementalImprovementSolver(Solver):
 
     @staticmethod
     def distance_callback(from_node, to_node):
-        return (100 - from_node - to_node)
+        return (MAX_NUMBER_OF_TAGS + 1 - from_node - to_node)
 
     def optimize(self, slide_array):
         tsp_size = len(slide_array)
@@ -33,7 +34,7 @@ class IncrementalImprovementSolver(Solver):
 
         routing = pywrapcp.RoutingModel(tsp_size, num_routes, depot)
         search_parameters = pywrapcp.RoutingModel.DefaultSearchParameters()
-        search_parameters.time_limit_ms = 120000
+        search_parameters.time_limit_ms = 10000
         search_parameters.local_search_metaheuristic = (
             routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
         routing.SetArcCostEvaluatorOfAllVehicles(self.distance_callback)
@@ -73,9 +74,8 @@ class IncrementalImprovementSolver(Solver):
 
         new_slide_list = old_ss_slides[0:start] + optimized_chunk + old_ss_slides[end:]
 
-
         result = SlideShow(self.dataset.dataset_letter)
-        for i,slide in enumerate(new_slide_list):
+        for i, slide in enumerate(new_slide_list):
             result.add_slide(slide)
 
         self.validate(result)

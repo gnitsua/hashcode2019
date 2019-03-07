@@ -1,6 +1,7 @@
 import json
 import os
 
+MAX_NUMBER_OF_TAGS = 100
 
 class Orientation:
     horizontal = 'horizontal'
