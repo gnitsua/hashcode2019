@@ -9,11 +9,11 @@ from solvers.BaseSolver import Solver
 
 
 class IncrementalImprovementSolver(Solver):
-    CHUNK_SIZE = 100
+    CHUNK_SIZE = 150
 
     def get_solution_to_work_on(self):
         ss_ids = self.dataset.r.zrange(RedisKey.score_container(self.dataset.dataset_letter), 0, 5, withscores=True,
-                                      desc=True)
+                                       desc=True)
         ss_id = random.choice(ss_ids)
         assert (ss_id != None)
         slide_show_string = self.dataset.r.get(RedisKey.slide_container(self.dataset.dataset_letter, ss_id[0][5:]))
@@ -48,7 +48,8 @@ class IncrementalImprovementSolver(Solver):
             node = routing.Start(route_number)
             while not routing.IsEnd(node):
                 node = assignment.Value(routing.NextVar(node))
-
+            if (len(result) != len(slide_array)):
+                return slide_array
             return result
         else:
             print 'No solution found.'
@@ -73,9 +74,8 @@ class IncrementalImprovementSolver(Solver):
 
         new_slide_list = old_ss_slides[0:start] + optimized_chunk + old_ss_slides[end:]
 
-
         result = SlideShow(self.dataset.dataset_letter)
-        for i,slide in enumerate(new_slide_list):
+        for i, slide in enumerate(new_slide_list):
             result.add_slide(slide)
 
         self.validate(result)
