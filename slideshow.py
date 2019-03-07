@@ -24,16 +24,6 @@ class SlideShow():
 
         return result
 
-    @classmethod
-    def getFromRedis(cls, id, dataset):
-        r = redis.Redis(host=REDIS_HOST, password=REDIS_PASWORD)
-        ss = r.get(id)
-        if (ss != None):
-            raise KeyError("Slide show not found")
-        else:
-            return SlideShow.fromString(id, ss,
-                                        dataset)  # TODO: we could skip the score calculation if we use the one from the scoreboard
-
     def get_score(self):
         return self.internal_score
 
