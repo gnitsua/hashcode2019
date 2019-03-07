@@ -7,7 +7,7 @@ from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["b"]:
+    for dataset_letter in ["a"]:
 
         # dataset = Dataset(dataset_letter,start_fresh=True)
         dataset = Dataset(dataset_letter, start_fresh=False)
