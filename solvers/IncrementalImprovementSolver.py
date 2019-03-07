@@ -10,7 +10,7 @@ from constants import MAX_NUMBER_OF_TAGS
 
 
 class IncrementalImprovementSolver(Solver):
-    CHUNK_SIZE = 100
+    CHUNK_SIZE = 150
 
     def get_solution_to_work_on(self):
         ss_ids = self.dataset.r.zrange(RedisKey.score_container(self.dataset.dataset_letter), 0, 5, withscores=True,
@@ -49,7 +49,8 @@ class IncrementalImprovementSolver(Solver):
             node = routing.Start(route_number)
             while not routing.IsEnd(node):
                 node = assignment.Value(routing.NextVar(node))
-
+            if (len(result) != len(slide_array)):
+                return slide_array
             return result
         else:
             print 'No solution found.'
