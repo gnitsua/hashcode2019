@@ -5,7 +5,7 @@ import redis
 from Slide import Slide
 from constants import REDIS_HOST
 from constants import REDIS_PASWORD
-
+from ImageInSlideshowError import ImageInSlideshowError
 
 class SlideShow():
     def __init__(self, dataset_letter):
@@ -35,7 +35,7 @@ class SlideShow():
         # check if it can be added
         for image in slide:
             if image in self.images:
-                raise (AttributeError("image already in slideshow"))
+                raise (ImageInSlideshowError("image already in slideshow"))
 
         # if so add
         self.slides.append(slide)
