@@ -1,4 +1,5 @@
 from Dataset import Dataset
+from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
 from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
 
 # import matplotlib.pyplot as plt
@@ -6,17 +7,22 @@ from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["d"]:
+    for dataset_letter in ["b"]:
 
         # dataset = Dataset(dataset_letter,start_fresh=True)
-        dataset = Dataset(dataset_letter, start_fresh=True)
+        dataset = Dataset(dataset_letter, start_fresh=False)
 
-        solver = SlideShowInjectorSolver(dataset)
-        ss = solver.solve()
+        solver = IncrementalImprovementSolver(dataset)
+        while (True):
+            try:
+                ss = solver.solve()
+                break
+            except AttributeError as e:
+                print("redis rejected solution {}".format(e.message))
+
         if (ss != None):
             scores.append(ss.get_score())
-            with open("results/result-" + dataset_letter + "-" + str(ss.get_score()) + ".txt", "w") as file:
-                file.write(str(ss))
+            ss.save_to_file()
 
     total = 0
     for score in scores:
