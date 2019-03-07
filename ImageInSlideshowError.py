@@ -1,0 +1,2 @@
+class ImageInSlideshowError(AttributeError):
+    pass

@@ -10,22 +10,11 @@ from constants import MAX_NUMBER_OF_TAGS
 
 
 class IncrementalImprovementSolver(Solver):
-    CHUNK_SIZE = 150
-
-    def get_solution_to_work_on(self):
-        ss_ids = self.dataset.r.zrange(RedisKey.score_container(self.dataset.dataset_letter), 0, 5, withscores=True,
-                                       desc=True)
-        ss_id = random.choice(ss_ids)
-        assert (ss_id != None)
-        slide_show_string = self.dataset.r.get(RedisKey.slide_container(self.dataset.dataset_letter, ss_id[0][5:]))
-        assert (slide_show_string != None)
-        ss = SlideShow.fromString(slide_show_string, self.dataset)
-        assert (ss != None)
-        return ss
+    CHUNK_SIZE = 50
 
     @staticmethod
     def distance_callback(from_node, to_node):
-        return (MAX_NUMBER_OF_TAGS + 1 - from_node - to_node)
+        return MAX_NUMBER_OF_TAGS + 1 - (from_node - to_node)
 
     def optimize(self, slide_array):
         tsp_size = len(slide_array)
@@ -50,6 +39,7 @@ class IncrementalImprovementSolver(Solver):
             while not routing.IsEnd(node):
                 node = assignment.Value(routing.NextVar(node))
             if (len(result) != len(slide_array)):
+                print("no solution found")
                 return slide_array
             return result
         else:
