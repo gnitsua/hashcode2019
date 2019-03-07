@@ -12,10 +12,11 @@ class IncrementalImprovementSolver(Solver):
     CHUNK_SIZE = 100
 
     def get_solution_to_work_on(self):
-        ss_id = self.dataset.r.zrange(RedisKey.score_container(self.dataset.dataset_letter), 0, 0, withscores=True,
+        ss_ids = self.dataset.r.zrange(RedisKey.score_container(self.dataset.dataset_letter), 0, 5, withscores=True,
                                       desc=True)
+        ss_id = random.choice(ss_ids)
         assert (ss_id != None)
-        slide_show_string = self.dataset.r.get(RedisKey.slide_container(self.dataset.dataset_letter, ss_id[0][0][5:]))
+        slide_show_string = self.dataset.r.get(RedisKey.slide_container(self.dataset.dataset_letter, ss_id[0][5:]))
         assert (slide_show_string != None)
         ss = SlideShow.fromString(slide_show_string, self.dataset)
         assert (ss != None)
@@ -32,7 +33,7 @@ class IncrementalImprovementSolver(Solver):
 
         routing = pywrapcp.RoutingModel(tsp_size, num_routes, depot)
         search_parameters = pywrapcp.RoutingModel.DefaultSearchParameters()
-        search_parameters.time_limit_ms = 3000
+        search_parameters.time_limit_ms = 120000
         search_parameters.local_search_metaheuristic = (
             routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
         routing.SetArcCostEvaluatorOfAllVehicles(self.distance_callback)
@@ -45,20 +46,8 @@ class IncrementalImprovementSolver(Solver):
             # Only one route here; otherwise iterate from 0 to routing.vehicles() - 1.
             route_number = 0
             node = routing.Start(route_number)
-            start_node = node
-            route = ''
-            # result.append(slide_array[start_node])
             while not routing.IsEnd(node):
-                route += str(node) + ' -> '
                 node = assignment.Value(routing.NextVar(node))
-                print(node)
-                result.append(slide_array[node-1])
-            print "Route:\n\n" + route
-            # result.append(slide_array[start_node])
-            # while not routing.IsEnd(node):
-            #     next_slide = assignment.Value(routing.NextVar(node))
-            #     print(next_slide)
-            #     result.append(next_slide)
 
             return result
         else:
@@ -82,18 +71,13 @@ class IncrementalImprovementSolver(Solver):
 
         optimized_chunk = self.optimize(chunk_to_improve)
 
-        print(len(old_ss_slides[0:start]),len(optimized_chunk),len(old_ss_slides[end:]))
-        print(len(old_ss_slides))
         new_slide_list = old_ss_slides[0:start] + optimized_chunk + old_ss_slides[end:]
 
 
-        print(start,end)
         result = SlideShow(self.dataset.dataset_letter)
         for i,slide in enumerate(new_slide_list):
-            print(i,slide.__str__(pretty=True))
             result.add_slide(slide)
 
-        print(old_ss.get_score(),result.get_score())
         self.validate(result)
         return result
 

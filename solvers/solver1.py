@@ -1,4 +1,5 @@
 import random
+import time
 
 from BaseSolver import Solver
 from Slide import Slide
@@ -15,17 +16,21 @@ class Solver1(Solver):
     def solve(self):
         slideshow = SlideShow(self.dataset.dataset_letter)
 
-        unsused_images = self.dataset.images[:]
-        while (len(unsused_images) > 0):
-            random_image = unsused_images.pop(random.randint(0, len(unsused_images) - 1))
-            if random_image.orientation == Orientation.vertical:
-                if (len(self.known_horiontal) > 0):
-                    slideshow.add_slide(Slide(random_image, self.known_horiontal.pop(0)))
-                else:
-                    self.known_horiontal.append(random_image)
+        # unsused_images = self.dataset.images[:]
+        start = time.time()
+        while (time.time()-start < 30):
+            try:
+                random_image = self.dataset.get(1)
+                if random_image.orientation == Orientation.vertical:
+                    if (len(self.known_horiontal) > 0):
+                        slideshow.add_slide(Slide(random_image, self.known_horiontal.pop(0)))
+                    else:
+                        self.known_horiontal.append(random_image)
 
-            else:
-                slideshow.add_slide(Slide(random_image))
+                else:
+                    slideshow.add_slide(Slide(random_image))
+            except AttributeError as e:
+                print(e)
 
         self.validate(slideshow)
         return slideshow

@@ -29,7 +29,7 @@ class Solver():
         for slideshow_to_kill in slideshows_to_kill:
             slide_show_score = self.dataset.get_slideshow_score(slideshow_to_kill)
 
-            if (slide_show_score > score):
+            if (slide_show_score >= score):
                 raise AttributeError(
                     "Slide currently in use by a slideshow with a higher score ({}>{})".format(slide_show_score, score))
 
