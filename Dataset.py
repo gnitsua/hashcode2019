@@ -33,9 +33,9 @@ class Dataset():
 
     def remove_slide_show(self, id):
         assert (regex.match("^.-ss", id))
-        assert (self.r.scard(id) > 0)
-        starting_number_of_unused = self.r.scard(RedisKey.unused_images_container(self.dataset_letter))
-        number_in_slideshow = self.r.scard(id)
+        # assert (self.r.scard(id) > 0)
+        # starting_number_of_unused = self.r.scard(RedisKey.unused_images_container(self.dataset_letter))
+        # number_in_slideshow = self.r.scard(id)
         pipe = self.r.pipeline()
         pipe.zrem(RedisKey.score_container(self.dataset_letter), id)  # remove the entry from the score board
         pipe.delete(RedisKey.slide_container(self.dataset_letter, id))  # remove entry for the slide container
@@ -43,8 +43,8 @@ class Dataset():
                          RedisKey.unused_images_container(self.dataset_letter), id)
         pipe.delete(id)
         pipe.execute()
-        ending_number_of_unused = self.r.scard(RedisKey.unused_images_container(self.dataset_letter))
-        assert (ending_number_of_unused - starting_number_of_unused == number_in_slideshow)
+        # ending_number_of_unused = self.r.scard(RedisKey.unused_images_container(self.dataset_letter))
+        # assert (ending_number_of_unused - starting_number_of_unused == number_in_slideshow)
 
     def get(self, safeness=1):
         """
@@ -53,30 +53,12 @@ class Dataset():
         """
         if (random.random() > safeness or self.r.scard(RedisKey.unused_images_container(self.dataset_letter)) == 0):
             random_image_number = random.randint(0, len(self.images) - 1)  # for unsafe gets, don't consult redis
-            # while(True):
-            #     key = self.r.randomkey()
-            #     if(regex.match("^"+RedisKey.slideshow(self.dataset_letter,""),key)):
-            #         set_to_pull_from = key
-            #         break
-
-
         else:
             random_image_number = self.r.srandmember(
                 RedisKey.unused_images_container(self.dataset_letter))  # only pull from unused images
 
         assert (random_image_number != None)
         return self.images[int(random_image_number)]
-
-    # # @cached(cache=LRUCache(maxsize=1000))
-    # def find_image(self, image):  # TODO: add memoization
-    #     if (self.r.sismember(RedisKey.unused_images_container(self.dataset_letter),
-    #                          image.id)):  # see if it's in the unused images first
-    #         return RedisKey.unused_images_container(self.dataset_letter)
-    #     else:
-    #         for set in self.r.keys(RedisKey.slide_container(self.dataset_letter,"")):
-    #             if (self.r.sismember(set, image.id)):
-    #                 return set
-    #     raise AssertionError("never found image (" + image.id + ")")
 
     def find_intersections(self, slide_show):
         start = time.time()
