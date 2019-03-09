@@ -1,7 +1,16 @@
+import itertools
+
 import numpy as np
 import sys
 import csv
 import random
+
+from Slide import Slide
+from constants import Orientation
+
+from Dataset import Dataset
+from constants import REDIS_HOST, REDIS_PASWORD
+
 
 def score(set1, set2):
     inter = len(set1.intersection(set2))
@@ -65,21 +74,8 @@ def parseFile(filename):
                 data.append([pid, kind, tags])
     return data
 
-def generateVslides(Vs):
-    Vint = []
-    IDsdone = set() # set of frozensets of used VID combinations
-    for i in Vs:
-        for j in Vs:
-            iset = frozenset((i[0],j[0]))
-            if i[0] == j[0]:
-                pass
-            elif iset in IDsdone:
-                pass
-            else:
-                unioned = i[2].union(j[2])
-                Vint.append([set((i[0], j[0])), 'V', unioned])
-                IDsdone.add(iset)
-    return Vint
+def generateVslides(vertical_images):
+    return set(itertools.combinations(vertical_images,2))
 
 def generateRandomVSlides(Vs):
     Vint = []
