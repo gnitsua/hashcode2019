@@ -1,6 +1,2 @@
-class ImageInSlideShowError(AttributeError):
-    pass
-
-
-class ImageInAnotherSlideShowError(AssertionError):
+class ImageInSlideshowError(AttributeError):
     pass

@@ -1,28 +1,31 @@
-from Dataset import Dataset
-from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
+import numpy as np
+
+from Parser import Parser
+from slideshow import SlideShow
+from solvers.solver2 import Solver2
 
 # import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     scores = []
 
-    for dataset_letter in ["d"]:
+    for dataset_letter in ["b","c","d","e"]:
+        with open("results/result_"+dataset_letter+".txt", "w") as file:
+            dataset = Parser.parse(dataset_letter)
 
-        # dataset = Dataset(dataset_letter,start_fresh=True)
-        dataset = Dataset(dataset_letter, start_fresh=True)
-
-        solver = SlideShowInjectorSolver(dataset)
-        ss = solver.solve()
-        if (ss != None):
-            scores.append(ss.get_score())
-            with open("results/result-" + dataset_letter + "-" + str(ss.get_score()) + ".txt", "w") as file:
-                file.write(str(ss))
+            solver = Solver2(dataset)
+            ss = solver.solve()
+            print(ss)
+            file.write(str(ss))
+            scores.append(ss.score())
 
     total = 0
     for score in scores:
-        print("Score:" + str(score))
+        print("Score:"+str(score))
         total += score
     print(total)
+
+
 
     # with open(dataset_letter+"_distances.txt","w") as file:
     #
@@ -33,6 +36,10 @@ if __name__ == "__main__":
     #             file.write("("+str(i)+","+ str(j)+"):"+str(temp_slideshow.score())+"\n")
     #             # distance["("+str(i), str(j)+")"] = temp_slideshow.score()
     #             # datasets[i][j] = (image1.tags,image2.tags)
+
+
+
+
 
     # np.save("distance" + dataset_letter + ".npy", distance)
     # print(distance)

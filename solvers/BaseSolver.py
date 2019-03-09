@@ -14,5 +14,5 @@ class Solver():
         slide = Slide(test1, test2)
         slide2 = Slide(test1, test3)
 
-        ss = SlideShow([slide, slide2])
+        ss = SlideShow([slide,slide2])
         return ss

@@ -118,5 +118,3 @@ dmypy.json
 .idea/
 results/
 **.zip
-config.json
-**.txt
