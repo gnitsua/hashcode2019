@@ -125,6 +125,8 @@ class Redis():
         pipe = self.r.pipeline()
         for image_id in self.r.smembers(slide_show_key):
             pipe.smove(slide_show_key, RedisKey.unused_images_container(dataset_letter), image_id)
+        pipe.delete(RedisKey.slide_container(dataset_letter,slide_show_id))
+        pipe.zrem(RedisKey.score_container(dataset_letter),RedisKey.slide_show(dataset_letter,slide_show_id))
         pipe.execute()
 
     def intersect_slide_shows(self, slide_show_id_1, slide_show_id_2):
