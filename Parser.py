@@ -28,14 +28,7 @@ class Parser():
             if line_no < InputFile.lines_to_skip:
                 continue
 
-            line = line.replace('\n', '')
-
-            data = line.split(' ')
-
-            id = line_no - InputFile.lines_to_skip
-            orientation = data[0]
-            number_of_tags = data[1]
-            tags = data[2:]
+            id, orientation, tags = Parser.parse_line(line_no, line)
 
             image = Image(id, orientation, tags)
             images.append(image)
@@ -43,6 +36,19 @@ class Parser():
         file.close()
 
         return images
+
+    @staticmethod
+    def parse_line(line_no, line):
+        line = line.replace('\n', '')
+
+        data = line.split(' ')
+
+        id = line_no - InputFile.lines_to_skip
+        orientation = data[0]
+        number_of_tags = data[1]
+        tags = data[2:]
+
+        return id, orientation, tags
 
     @staticmethod
     def parse(data_set_letter):
@@ -59,3 +65,16 @@ class Parser():
             images = Parser.parse_images(data_set)
 
         return images
+
+    @staticmethod
+    def get_lines(letter):
+        all_data_sets = Parser.get_data_sets()
+
+        data_set = all_data_sets[letter]
+
+        print('Parsing', data_set)
+        file = open(data_set, 'r')
+
+        lines = file.readlines()
+
+        return lines

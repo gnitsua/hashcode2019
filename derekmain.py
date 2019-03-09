@@ -1,18 +1,18 @@
 from Parser import Parser
 from result import Result
 
-from solvers import Solver4 as Solver
-solver_name = 'solver4'
+from solvers import Solver5 as Solver
+solver_name = 'solver5'
 
-input_keys = ['a', 'b', 'c', 'd', 'e']
-# input_keys = ['e']
+# input_keys = ['a', 'b', 'c', 'd', 'e']
+input_keys = ['d']
 
 for input_key in input_keys:
-    images = Parser.parse(input_key)
+    lines = Parser.get_lines(input_key)
 
     print 'Solving...'
-    solver = Solver(images)
-    slide_show = solver.solve()
+    solver = Solver(lines)
+    slide_show = solver.solve(input_key)
 
     print 'Writing result to file'
     result = Result()

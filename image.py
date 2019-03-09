@@ -29,6 +29,6 @@ class Image(object):
 
     def __str__(self, pretty=False):
         if (pretty == True):
-        return ""+str(self.id)+"("+self.orientation+"): "+str(self.tags)
+            return ""+str(self.id)+"("+self.orientation+"): "+str(self.tags)
         else:
             return str(self.id)

@@ -12,37 +12,80 @@ class Solver5(Solver):
     Creating a slide show by grouping slides (H or VV) by number of tags
     """
 
-    def __init__(self, raw_text):
-        self.raw_text = raw_text
+    def __init__(self, lines):
+        self.lines = lines
+        self.raw_text = ''
+        self.used_images = ''
+        self.images = []
 
-    def solve(self):
-        slide_list = []
-        used_images = ''
+    def solve(self, letter):
+        slideshow = SlideShow(letter)
 
-        slideshow = SlideShow()
-
-        images, text = parse_string(self.raw_text)
+        self.images, text = parse_string(self.lines)
         regexer = Regexer(text)
 
         # Use the first horizontal image as first page
-        index = regexer.get_horizontal()[0]
-        image = images[index]
-        tags = image.tags
-        used_images += str(index)
-        slideshow.add_images(image)
+        line = regexer.get_line(Orientation.horizontal)
 
-        while True:
+        image = self.get_and_use_image(line)
+        tags = image.tags
+
+        slide = Slide(image)
+        slideshow.add_slide(slide)
+
+        for x in range(1000):
             # Try to find an image with tag
-            regexer.get_image_with_tag(tags, used_images)
+            tags = [tags.pop()] if tags else []
+
+            line = regexer.get_line_with_tags(tags, self.used_images)
+            if line is None:
+                line = regexer.get_random_line(self.used_images)
+            if line is None:
+                break
+
+
+            image = self.get_and_use_image(line)
+
+            images = []
+            images.append(image)
+
+            if image.orientation == Orientation.vertical:
+                # Get another vertical image
+                line = regexer.get_line(Orientation.vertical)
+                if line is None:
+                    continue
+                image = self.get_and_use_image(line)
+            else:
+                image = None
+
+            images.append(image)
+
+            # Generate tags for this slide
+            tags = set().union(*[i for i in images if i])
+
+            slide = Slide(*images)
+            slideshow.add_slide(slide)
 
         return slideshow
 
+    def get_and_use_image(self, line):
+        # Takes in a line and does all the necessary stuff
+        id = Regexer.get_id(line)
+        self.add_to_used_images(id)
+        return self.images[int(id)]
+
+    def add_to_used_images(self, id):
+        if self.used_images:
+            str = '|{}'.format(id)
+        else:
+            str = '{}'.format(id)
+
+        self.used_images += str
 
 
 # Utility functions
-def parse_string(orig):
+def parse_string(lines):
     # Cleans raw file format and gets it ready for processing
-    lines = orig.split('\n')
     images = []
     formatted_lines = []
 
@@ -52,25 +95,73 @@ def parse_string(orig):
             # Last line is empty
             continue
 
-        id = line_no - 1
-        orientation, _, tags = Parser.parse_line(line)
+        id, orientation, tags = Parser.parse_line(line_no, line)
 
         image = Image(id, orientation, tags)
+        images.append(image)
+
         formatted_line = '{} o:{} {}'.format(id, orientation, '-'.join(tags))
         formatted_lines.append(formatted_line)
 
-    formatted_string = '\n'.join(formatted_lines)
+    formatted_string = ''.join(formatted_lines)
 
     return images, formatted_string
 
+def get_tag_subset(tags, number_of_tags=1):
+    # Returns a set number of tags, if there aren't enough tags available,
+    # just return them all
+    tag_list = list(tags)
+
+    count = number_of_tags if number_of_tags <= len(tag_list) else len(tag_list)
+    slice = tag_list[:count]
+
+    return slice
+
 
 class Regexer():
-    def __init__(self, text):
+    ID = r'(\d*)'
+
+    def __init__(self, text=''):
         self.text = text
 
-    def get_horizontal(self):
-        matches = re.findall(r'(\d*) o:H .+', self.text)
-        return matches
+    @staticmethod
+    def get_id(line):
+        match = re.search(Regexer.ID, line)
+        return match.group()
 
-    def get_image_with_tag(self, tags, used_images):
-        exclude_images = '[{}]'.format(used_images)
+    def get_line(self, o=None, t=None):
+        id = self.ID
+
+        if o:
+            abbreviation = 'H' if o == Orientation.horizontal else 'V'
+            orientation = r'o:{}'.format(abbreviation)
+        else:
+            orientation = r'o:.'
+
+        if t:
+            # logic for tags
+            pass
+        else:
+            tags = r'.+'
+
+        regex = r'{} {} {}'.format(id, orientation, tags)
+        match = re.search(regex, self.text)
+
+        return match and match.group()
+
+
+    def get_random_line(self, used_lines):
+        exclude_lines = r'^(?!{})'.format(used_lines)
+        match = re.search(exclude_lines, self.text)
+
+        return match and match.group()
+
+
+    def get_line_with_tags(self, tags, used_lines):
+        exclude_lines = r'^(?!{})'.format(used_lines)
+        include_tags = ''.join(r'(?=.*{})'.format(t) for t in tags)
+        regex = exclude_lines + include_tags
+
+        match = re.search(regex, self.text)
+
+        return match and match.group()
