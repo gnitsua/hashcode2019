@@ -35,7 +35,6 @@ class SlideShowInjectorSolver(Solver):
             with open("results/" + slide_show_file, "r") as file:
                 temp = file.read()
                 ss = SlideShow.fromString(temp, self.dataset)
-                self.dataset.upload(ss)
                 return ss
         else:
             print("no valid slideshow for {}".format(self.dataset.dataset_letter))

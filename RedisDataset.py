@@ -55,9 +55,9 @@ class RedisDataset(object, Dataset):
             print("slide shows to kill {}".format(slide_shows_to_kill))
             for slide_show_to_kill in slide_shows_to_kill:
                 score = self.r.get_score(self.dataset_letter, slide_show_to_kill)
-                if (score > slide_show.get_score()):
+                if (score >= slide_show.get_score()):
                     raise ImageInAnotherSlideShowError(
-                        "Image in slideshow with higher score ({} > {})".format(score, slide_show.get_score()))
+                        "Image in slideshow with higher score ({} >= {})".format(score, slide_show.get_score()))
 
             # then delete those slide shows
             for slide_show_to_kill in slide_shows_to_kill:
