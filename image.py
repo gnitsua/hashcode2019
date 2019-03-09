@@ -22,13 +22,13 @@ class Image(object):
         self.database_letter = letter
 
     def __sub__(self, other):
-        return self.tags-other.tags
+        return self.tags - other.tags
 
     def __hash__(self):
         return self.id
 
     def __str__(self, pretty=False):
         if (pretty == True):
-        return ""+str(self.id)+"("+self.orientation+"): "+str(self.tags)
+            return "" + str(self.id) + "(" + self.orientation + "): " + str(self.tags)
         else:
             return str(self.id)
