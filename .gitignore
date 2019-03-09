@@ -116,3 +116,7 @@ dmypy.json
 .pyre/
 
 .idea/
+results/
+**.zip
+config.json
+**.txt
