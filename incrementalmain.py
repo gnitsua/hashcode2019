@@ -1,13 +1,13 @@
 from Dataset import Dataset
-from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
-from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
 from constants import DatasetLetter
+from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
+
 # import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     scores = []
 
-    while(True):
+    while (True):
         for dataset_letter in DatasetLetter.D:
 
             # dataset = Dataset(dataset_letter,start_fresh=True)

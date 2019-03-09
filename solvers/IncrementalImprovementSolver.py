@@ -3,10 +3,9 @@ import random
 from ortools.constraint_solver import pywrapcp
 from ortools.constraint_solver import routing_enums_pb2
 
-from constants import RedisKey
+from constants import MAX_NUMBER_OF_TAGS
 from slideshow import SlideShow
 from solvers.BaseSolver import Solver
-from constants import MAX_NUMBER_OF_TAGS
 
 
 class IncrementalImprovementSolver(Solver):
