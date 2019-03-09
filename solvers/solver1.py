@@ -13,23 +13,6 @@ class Solver1(Solver):
     known_horiontal = []
 
     def solve(self):
-<<<<<<< HEAD
-        slideshow = SlideShow()
-        vertical_image = None
-
-        for image in self.dataset:
-            if image.orientation == Orientation.vertical:
-                if vertical_image is None:
-                    # Save image and wait for another vertical one
-                    vertical_image = image
-                else:
-                    # Add both vertical images to our slideshow
-                    slideshow.add_images(image, vertical_image)
-                    vertical_image = None
-            else:
-                # Horizontal images, one per page
-                slideshow.add_images(image)
-=======
         slide_show = SlideShow(self.dataset.dataset_letter)
 
         # unsused_images = self.dataset.images[:]
@@ -49,7 +32,5 @@ class Solver1(Solver):
                     slide_show.add_slide(Slide(random_image))
             except AttributeError as e:
                 pass
-                # print(e)
->>>>>>> f5651a27fb99098d7bf84cbac6ee06516df36bc0
 
         return slide_show
