@@ -1,14 +1,13 @@
 import numpy as np
-import pandas as pd
 import sys
 import csv
 import random
 
 def score(set1, set2):
-    inter = set1.intersection(set2)
-    disjoint1 = set1.difference(set2)
-    disjoint2 = set2.difference(set1)
-    return len(min(inter, disjoint1, disjoint2, key=len))
+    inter = len(set1.intersection(set2))
+    disjoint1 = len(set1) - inter
+    disjoint2 = len(set2) - inter
+    return min(inter, disjoint1, disjoint2)
 
 def validateScore(fn, dfn):
     data = parseFile(dfn)
@@ -68,22 +67,18 @@ def parseFile(filename):
 
 def generateVslides(Vs):
     Vint = []
-    IDsdone = set() # set of tuples of used VID combinations (in both orientations) (used to exclude re-combos)
+    IDsdone = set() # set of frozensets of used VID combinations
     for i in Vs:
         for j in Vs:
-            o1 = (i[0],j[0])
-            o2 = (j[0],i[0])
+            iset = frozenset((i[0],j[0]))
             if i[0] == j[0]:
                 pass
-            elif o1 in IDsdone:
-                pass
-            elif o2 in IDsdone:
+            elif iset in IDsdone:
                 pass
             else:
                 unioned = i[2].union(j[2])
                 Vint.append([set((i[0], j[0])), 'V', unioned])
-                IDsdone.add((i[0],j[0]))
-                IDsdone.add((j[0],i[0]))
+                IDsdone.add(iset)
     return Vint
 
 def generateRandomVSlides(Vs):
@@ -149,7 +144,7 @@ def solve1(Hs,Vs,allSlidesPossible):
     count = 0
     solution = [count]
     total = 0
-    SCOREXinit = 6 # VARY ME
+    SCOREXinit = 5 # VARY ME
 
     random.seed()
     if len(Hs) != 0:
