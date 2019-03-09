@@ -18,7 +18,7 @@ class SlideShowInjectorSolver(Solver):
 
     def solve(self):
         max_score = 0
-        ss = None
+        slide_show_file = None
         for filename in os.listdir("results"):
             try:
                 parsed = self.parse_filename(filename)
@@ -27,15 +27,15 @@ class SlideShowInjectorSolver(Solver):
                     score = parsed["score"]
                     if (score > max_score):
                         max_score = score
-                        with open("results/" + filename, "r") as file:
-                            temp = file.read()
-                            ss = SlideShow.fromString(temp, self.dataset)
+                        slide_show_file = filename
             except AssertionError:
                 print("not a valid filename ({})".format(filename))
-        if (ss != None):
+        if (slide_show_file != None):
             print("adding")
-            print(ss.__str__(pretty=True))
-            self.validate(ss)
+            with open("results/" + slide_show_file, "r") as file:
+                temp = file.read()
+                ss = SlideShow.fromString(temp, self.dataset)
+                self.dataset.upload(ss)
+                return ss
         else:
             print("no valid slideshow for {}".format(self.dataset.dataset_letter))
-        return ss

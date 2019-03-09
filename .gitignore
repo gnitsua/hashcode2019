@@ -119,4 +119,4 @@ dmypy.json
 results/
 **.zip
 config.json
-b_distances.txt
+**.txt

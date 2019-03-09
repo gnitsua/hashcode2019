@@ -1,14 +1,14 @@
 import uuid
 
 from Slide import Slide
-from errors import ImageInSlideShowError
+from errors import ImageInSlideshowError
 
 
 class SlideShow():
     def __init__(self, dataset_letter, id=None):
         self.dataset_letter = dataset_letter
         if (id == None):
-            self.id = str(uuid.uuid4())
+        self.id = str(uuid.uuid4())
         else:
             self.id = id
 
@@ -61,8 +61,8 @@ class SlideShow():
     def get_image_ids(self):
         return map(lambda image: image.__hash__(), self.get_images())
 
-    def save_to_file(self, filepath="results/"):
-        with open(filepath + "result-" + self.dataset_letter + "-" + str(self.get_score()) + ".txt", "w") as file:
+    def save_to_file(self,filepath = "results/"):
+        with open(filepath+"result-" + self.dataset_letter + "-"+str(self.get_score())+".txt", "w") as file:
             file.write(str(self))
 
     def __str__(self, pretty=False):

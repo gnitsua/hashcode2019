@@ -28,7 +28,7 @@ class RedisDataset(object, Dataset):
         self.r.add_dataset(self)
 
     def remove(self):
-        self.r.flush_associated_keys(self.dataset_letter)
+        self.r.remove_dataset(self.dataset_letter)
 
     def slide_shows(self):
         return self.r.get_all_slide_shows(self.dataset_letter)
@@ -66,8 +66,6 @@ class RedisDataset(object, Dataset):
             # then try to create it again
             self.r.create_slide_show(slide_show.id, slide_show.get_image_ids(), slide_show.get_score(), str(slide_show),
                                      self.dataset_letter)
-
-        print("Time elapsed: {}".format(time.time() - start))
 
     def remove_slide_show(self, slide_show_id):
         self.r.remove_slide_show(slide_show_id, self.dataset_letter)
