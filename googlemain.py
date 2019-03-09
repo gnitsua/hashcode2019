@@ -5,19 +5,20 @@ from constants import DatasetLetter
 from constants import REDIS_HOST
 from constants import REDIS_PASWORD
 from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
+from solvers.GoogleORTools import GoogleORTools
 
 if __name__ == "__main__":
 
     scores = []
-    while(True):
-        for dataset_letter in [DatasetLetter.E]:
+    while (True):
+        for dataset_letter in [DatasetLetter.B, DatasetLetter.C, DatasetLetter.D, DatasetLetter.E]:
             dataset = RedisDataset(dataset_letter.name.lower(), REDIS_HOST, REDIS_PASWORD, start_fresh=False)
 
-            solver = IncrementalImprovementSolver(dataset)
+            solver = GoogleORTools(dataset)
             try:
                 start = time.time()
                 ss = solver.solve()
-                print("Solution found in {}, uploading".format(time.time()-start))
+                print("Solution found in {}, uploading".format(time.time() - start))
                 dataset.upload(ss)
                 scores.append(ss.get_score())
                 ss.save_to_file()

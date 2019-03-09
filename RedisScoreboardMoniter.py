@@ -2,15 +2,16 @@ import time
 
 from Redis import Redis
 from constants import DatasetLetter, RedisKey, REDIS_HOST, REDIS_PASWORD
-
+from playsound import playsound
 
 class RedisScoreboardMoniter():
     def __init__(self, clear=False):
         self.r = Redis(host=REDIS_HOST, password=REDIS_PASWORD)
 
     def run(self):
+        last_top_score = 0
         while (True):
-            topscore = 0
+            top_score = 0
             for dataset_letter_class in list(DatasetLetter):
                 dataset_letter = dataset_letter_class.value
                 print("Scores for {}".format(RedisKey.score_container(dataset_letter)))
@@ -18,12 +19,16 @@ class RedisScoreboardMoniter():
                 if (len(top_five) > 0):
                     for rank, score in enumerate(top_five):
                         print(str(rank + 1) + ". " + score[0] + "(" + str(score[1]) + ")")
-                    topscore += top_five[0][1]
+                    top_score += top_five[0][1]
                     self.write_top_scores_to_file(dataset_letter, top_five[0][0], top_five[0][1])
                 else:
                     print("no scores yet")
                 print("Unused items: {}".format(self.r.get_num_unused_images(dataset_letter)))
-            print("Total best score {}".format(topscore))
+            print("Total best score {}".format(top_score))
+
+            if(top_score > last_top_score):
+                last_top_score = top_score
+                playsound('Music_Box.wav')
 
             time.sleep(15)
 
