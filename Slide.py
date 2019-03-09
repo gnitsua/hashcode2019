@@ -55,7 +55,10 @@ class Slide():
         return True
 
     def __hash__(self):
-        return self.image1.id  # TODO: only checking the first one
+        if (self.image2 != None):
+            return hash((self.image1, self.image2))  # TODO: only checking the first one
+        else:
+            return hash(self.image1)
 
     def __iter__(self):
         result = [self.image1]

@@ -1,7 +1,7 @@
 import uuid
 
 from Slide import Slide
-from errors import ImageInSlideshowError
+from errors import ImageInSlideShowError
 
 
 class SlideShow():

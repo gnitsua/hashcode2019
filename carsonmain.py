@@ -1,15 +1,10 @@
 import itertools
-
-import numpy as np
-import sys
-import csv
 import random
 
+from Dataset import Dataset
 from Slide import Slide
 from constants import Orientation
-
-from Dataset import Dataset
-from constants import REDIS_HOST, REDIS_PASWORD
+from slideshow import SlideShow
 
 
 def score(set1, set2):
@@ -17,6 +12,7 @@ def score(set1, set2):
     disjoint1 = len(set1) - inter
     disjoint2 = len(set2) - inter
     return min(inter, disjoint1, disjoint2)
+
 
 def validateScore(fn, dfn):
     data = parseFile(dfn)
@@ -37,10 +33,11 @@ def validateScore(fn, dfn):
 
     total = 0
     index = 0
-    while index < len(slideSets)-1:
-        total += score(slideSets[index],slideSets[index+1])
+    while index < len(slideSets) - 1:
+        total += score(slideSets[index], slideSets[index + 1])
         index += 1
     return total
+
 
 def parseSlideshow(filename):
     slides = []
@@ -58,6 +55,7 @@ def parseSlideshow(filename):
     else:
         return slides
 
+
 def parseFile(filename):
     data = []
     for datafile in [filename]:
@@ -74,204 +72,163 @@ def parseFile(filename):
                 data.append([pid, kind, tags])
     return data
 
+
 def generateVslides(vertical_images):
-    return set(itertools.combinations(vertical_images,2))
+    return set(map(lambda tuple: Slide(tuple[0], tuple[1]), itertools.combinations(vertical_images, 2)))
+
 
 def generateRandomVSlides(Vs):
     Vint = []
     random.shuffle(Vs)
 
     index = 0
-    while index < len(Vs)-1:
+    while index < len(Vs) - 1:
         i = Vs[index]
-        j = Vs[index+1]
+        j = Vs[index + 1]
         unioned = i[2].union(j[2])
-        Vint.append([set((i[0],j[0])), 'V', unioned])
+        Vint.append([set((i, j)), 'V', unioned])
         index += 2
     return Vint
 
-def removeID(gotIDs,slides):
-    if type(gotIDs) is set:
-        IDs = list(gotIDs)
-    else:
-        IDs = [gotIDs]
 
-    deleteme = []
-
-    Hs = []
-    Vs = []
+def remove_all_slides_with_image(image, slides):
+    result = set(slides)
     for slide in slides:
-        if type(slide[0]) is int:
-            Hs.append(slide)
-        else:
-            Vs.append(slide)
+        if (slide.image1 == image or slide.image2 == image):
+            result.remove(slide)
+    return result
 
-    Hs.sort(key=lambda x: x[0])
 
-    if len(IDs) == 1: # remove horizontal
-        ID = IDs[0]
-        index = 0
-        for Hslide in Hs:
-            if ID == Hslide[0]:
-                deleteme.append(index)
-            if ID < Hslide[0]:
-                break # leave for loop
-            index += 1
-        for i in sorted(deleteme, reverse=True):
-            del Hs[i]
-    else: #remove verticals
-        index = 0
-        for slide in Vs:
-            for ID in IDs:
-                if ID in slide[0]:
-                    deleteme.append(index)
-            index += 1
-        deletemeFixed = list(set(deleteme))
-        for i in sorted(deletemeFixed, reverse=True):
-            del Vs[i]
-    recombine = Hs + Vs
-    random.shuffle(recombine)
-    return recombine
-
-def solve1(Hs,Vs,allSlidesPossible):
+def solve1(Hs, Vs, allSlidesPossible, dataset_letter):
     # pick a random H to start with
     # force search until a score >= SCOREX is found
     # add, remove ID, reset SCOREX, and repeat
     count = 0
-    solution = [count]
+    solution = SlideShow(dataset_letter)
+    # solution = [count]
     total = 0
-    SCOREXinit = 5 # VARY ME
+    SCOREXinit = 5  # VARY ME
 
     random.seed()
     if len(Hs) != 0:
-        start = random.choice(Hs) # VARY ME (?)
+        start = random.sample(Hs, 1)[0]  # VARY ME (?)
+        Hs.remove(start)
     else:
-        start = random.choice(Vs)
-    A = start
+        start = random.sample(Vs, 1)[0]
+        Vs.remove(start)
 
-    # add A to solution
-    count += 1
-    solution[0] = count
-    solution.append(A)
-    allSlidesPossible = removeID(A[0],allSlidesPossible)
-
-
-    B = random.choice(allSlidesPossible)
+    solution.add_slide(start)
+    allSlidesPossible = remove_all_slides_with_image(start.image1, allSlidesPossible)
+    allSlidesPossible = remove_all_slides_with_image(start.image2, allSlidesPossible)
 
     while len(allSlidesPossible) > 0:
-        ATTEMPTSX = len(allSlidesPossible) # VARY ME, large effect on score and time
+        ATTEMPTSX = len(allSlidesPossible)  # VARY ME, large effect on score and time
         SCOREX = SCOREXinit
         attempts = 0
-        while score(A[2],B[2]) < SCOREX:
-            if attempts < ATTEMPTSX:
-                attempts += 1
-                B = random.choice(allSlidesPossible)
-            else:
-                SCOREX = SCOREX - 1
-                attempts = 0 #COULD GO IN ORDER, WHEN CONTINUING, KEEP GOING IN A CIRCLE TO ALLOW FOR A HIGHER SCORE TO REAPPEAR
-        count +=1
-        solution[0] = count
-        solution.append(B)
-        total += score(A[2],B[2])
-        allSlidesPossible = removeID(B[0],allSlidesPossible)
+        score_before = solution.get_score()
+        while True:
+            B = random.sample(allSlidesPossible, 1)[0]  # pick a random slide
+            solution.add_slide(B)  # add it to the slideshow
+            if (solution.get_score() - score_before < SCOREX):  # the increase in score is not enough to keep this slide
+                if attempts < ATTEMPTSX:
+                    attempts += 1
+                else:
+                    SCOREX = SCOREX - 1
+                    attempts = 0  # COULD GO IN ORDER, WHEN CONTINUING, KEEP GOING IN A CIRCLE TO ALLOW FOR A HIGHER SCORE TO REAPPEAR
+                solution.pop()  # so go back a step
+            else:  # we found our next slide
+                break
+
+        allSlidesPossible = remove_all_slides_with_image(B.image1, allSlidesPossible)
+        allSlidesPossible = remove_all_slides_with_image(B.image2, allSlidesPossible)
         if count % 100 == 0:
             if ATTEMPTSX != 0:
-                print total, " / #", count, " / ", len(allSlidesPossible), " left / ", 100*(float(attempts)/float(ATTEMPTSX)), "% tried"
-        if len(allSlidesPossible) > 0:
-            A = B
-            B = random.choice(allSlidesPossible)
+                print solution.get_score(), " / #", count, " / ", len(allSlidesPossible), " left / ", 100 * (
+                            float(attempts) / float(ATTEMPTSX)), "% tried"
 
-    return total,solution
+        count+=1
 
+    return solution.get_score(), solution
 
 
 if __name__ == "__main__":
 
     ##### READ DATA #####
-    #fn = "a_example.txt"
-    #fn = "b_lovely_landscapes.txt" # all horizontal
+    # fn = "a_example.txt"
+    # fn = "b_lovely_landscapes.txt" # all horizontal
     fn = "c_memorable_moments.txt"
-    #fn = "d_pet_pictures.txt"
-    #fn = "e_shiny_selfies.txt"
+    dataset_letter = "c"
+    # fn = "d_pet_pictures.txt"
+    # fn = "e_shiny_selfies.txt"
     datafile = "data_sets/" + fn
-    data = parseFile(datafile) #[ID, V/H, {tags}]
-    print "Read ", len(data), " lines from data file: ", datafile
+
+    dataset = Dataset(dataset_letter)
+    print "Read ", len(dataset.images), " lines from data file: ", datafile
 
     ##### SEPARATE RAW DATA INTO Vs and Hs #####
-    Vs = []
-    Hs = []
-    for i in data:
-        if i[1] == "V":
-            Vs.append(i)
+    Vs = set()
+    Hs = set()
+    for i in dataset.images:
+        if i.orientation == Orientation.vertical:
+            Vs.add(i)
         else:
-            Hs.append(i)
+            Hs.add(Slide(i))
 
-    VIDs = [item[0] for item in Vs]
+    VIDs = [item.id for item in Vs]
 
     ##### GENERATE ALL POSSIBLE VERTICALS #####
     print "Generating verticals from ", len(Vs), " vertical pictures"
 
     print "Generating ALL..."
-    Vint = generateVslides(Vs) # okay for low numbers of verticals, 500 works
-#OR VARY
-    #print "Generating randoms..."
-    #Vint = generateRandomVSlides(Vs)
+    Vint = generateVslides(Vs)  # okay for low numbers of verticals, 500 works
+    # OR VARY
+    # print "Generating randoms..."
+    # Vint = generateRandomVSlides(Vs)
 
     print "Calculated vertical combos... (", len(Vint), ")"
     # Vint is a list of all possible vertical combos (aka slides) [{ID1, ID2}, # of tags combined, tags combined] #=3
     # Hs is still a list of horizontal photos (aka slides) [ID, H, tags] #=3
 
-    allSlidesPossible = Hs + Vint
+    allSlidesPossible = Hs | Vint  # union
     print "All possible slides = ", len(allSlidesPossible)
     print len(Hs), "horizontals"
     print len(Vint), "vertical combinations"
 
-    total,solution = solve1(Hs,Vint,allSlidesPossible)
+    total, solution = solve1(Hs, Vint, allSlidesPossible, dataset_letter)
 
     print "Solution complete... "
-    print "Number of slides: ", len(solution)-1
+    print "Number of slides: ", len(solution.slides) - 1
     print "Score: ", total
 
-    outputName = "carsonResults/result-" + fn[0] + "-" + str(total) + ".txt"
-    with open(outputName, 'w') as f:
-        for item in solution:
-            if type(item) is int:
-                print >> f, item
-            elif type(item[0]) is set:
-                outlst = list(item[0])
-                outstr = " ".join(str(x) for x in outlst)
-                print >> f, outstr
-            else:
-                print >> f, item[0]
-                if item[0] in VIDs:
-                    print "ERROR: vertical ID alone"
+    solution.save_to_file()
 
-    # create sets of all pictures
-    # create all combos of verticals together
-    # calculate all intersections and all disjoints
-    # 1 - put all horizontals together then match up verticals after
-    # 2 - start with one horizontal, pick next matching or +/- 1, continue
-    # 2a - start with horizontal, pick all matching int/dis as new branches
-
-    total2 = validateScore(outputName,datafile)
-    print "Validated score from output file: ", total2
-
-    if total == total2:
-        print "\nCalculated score equals validated score from output file:", total, total2
-    else:
-        print "\nScores do not match... shit's broke"
-
-
-
-
-
-
-
-
-
-
-
-
+    # outputName = "results/result-" + fn[0] + "-" + str(total) + ".txt"
+    # with open(outputName, 'w') as f:
+    #     for item in solution.slides:
+    #         if type(item) is int:
+    #             print >> f, item
+    #         elif type(item[0]) is set:
+    #             outlst = list(item[0])
+    #             outstr = " ".join(str(x) for x in outlst)
+    #             print >> f, outstr
+    #         else:
+    #             print >> f, item[0]
+    #             if item[0] in VIDs:
+    #                 print "ERROR: vertical ID alone"
+    #
+    # # create sets of all pictures
+    # # create all combos of verticals together
+    # # calculate all intersections and all disjoints
+    # # 1 - put all horizontals together then match up verticals after
+    # # 2 - start with one horizontal, pick next matching or +/- 1, continue
+    # # 2a - start with horizontal, pick all matching int/dis as new branches
+    #
+    # total2 = validateScore(outputName, datafile)
+    # print "Validated score from output file: ", total2
+    #
+    # if total == total2:
+    #     print "\nCalculated score equals validated score from output file:", total, total2
+    # else:
+    #     print "\nScores do not match... shit's broke"
 
 # D random Vs, 2, 1/2, 45 minutes, 205703
-
