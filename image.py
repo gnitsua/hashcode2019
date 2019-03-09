@@ -11,7 +11,7 @@ class Image(object):
     @classmethod
     def fromString(cls, string, dataset):
         try:
-            string_as_int = int(string)  # skip the "databaseletter-"
+            string_as_int = int(string)
             return dataset.images[string_as_int]
         except ValueError as e:
             raise e
