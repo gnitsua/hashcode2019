@@ -1,16 +1,16 @@
 import uuid
 
-import redis
-
 from Slide import Slide
-from constants import REDIS_HOST
-from constants import REDIS_PASWORD
-from ImageInSlideshowError import ImageInSlideshowError
+from errors import ImageInSlideShowError
+
 
 class SlideShow():
-    def __init__(self, dataset_letter):
+    def __init__(self, dataset_letter, id=None):
         self.dataset_letter = dataset_letter
-        self.id = str(uuid.uuid4())
+        if (id == None):
+            self.id = str(uuid.uuid4())
+        else:
+            self.id = id
 
         self.internal_score = 0
         self.slides = []
@@ -35,7 +35,7 @@ class SlideShow():
         # check if it can be added
         for image in slide:
             if image in self.images:
-                raise (ImageInSlideshowError("image already in slideshow"))
+                raise (ImageInSlideShowError("{} already in slideshow".format(image.id)))
 
         # if so add
         self.slides.append(slide)
@@ -61,8 +61,8 @@ class SlideShow():
     def get_image_ids(self):
         return map(lambda image: image.__hash__(), self.get_images())
 
-    def save_to_file(self,filepath = "results/"):
-        with open(filepath+"result-" + self.dataset_letter + "-"+str(self.get_score())+".txt", "w") as file:
+    def save_to_file(self, filepath="results/"):
+        with open(filepath + "result-" + self.dataset_letter + "-" + str(self.get_score()) + ".txt", "w") as file:
             file.write(str(self))
 
     def __str__(self, pretty=False):

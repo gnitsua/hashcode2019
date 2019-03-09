@@ -1,7 +1,10 @@
 import json
 import os
 
+from enum import Enum
+
 MAX_NUMBER_OF_TAGS = 100
+
 
 class Orientation:
     horizontal = 'horizontal'
@@ -21,16 +24,12 @@ class InputFile:
 UNASSIGNED_IMAGE = "none"
 
 
-class DatasetLetter:
+class DatasetLetter(Enum):
     A = "a"
     B = "b"
     C = "c"
     D = "d"
     E = "e"
-
-    @classmethod
-    def __iter__(cls):
-        return [cls.A, cls.B, cls.C, cls.D, cls.E].__iter__()
 
 
 with open('config.json', 'r') as f:
@@ -46,11 +45,11 @@ class RedisKey:
         return '{}-score'.format(dataset_letter)
 
     @staticmethod
-    def slide_container(dataset_letter, slideshow_id):
-        return '{}-slides-{}'.format(dataset_letter, slideshow_id)
+    def slide_container(dataset_letter, slide_show_id):
+        return '{}-slides-{}'.format(dataset_letter, slide_show_id)
 
     @staticmethod
-    def slideshow(dataset_letter, id):
+    def slide_show(dataset_letter, id):
         return '{}-ss-{}'.format(dataset_letter, id)
 
     @staticmethod
@@ -58,9 +57,13 @@ class RedisKey:
         return dataset_letter
 
     @staticmethod
-    def temp_slideshow(id):
+    def temp_slide_show(id):
         return 'temp-ss{}'.format(id)
 
     @staticmethod
     def unused_images_sentinal(dataset_letter):  # Needed because redis deletes empty sets
         return "{}-sentinal".format(dataset_letter)
+
+    @staticmethod
+    def dataset_lock(dataset_letter):
+        return "{}-lock".format(dataset_letter)

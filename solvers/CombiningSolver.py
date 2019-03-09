@@ -1,6 +1,7 @@
+from ImageInSlideshowError import ImageInSlideshowError
 from slideshow import SlideShow
 from solvers.BaseSolver import Solver
-from ImageInSlideshowError import ImageInSlideshowError
+
 
 class CombiningSolver(Solver):
 

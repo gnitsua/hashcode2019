@@ -1,16 +1,14 @@
 import time
 
 from Dataset import Dataset
-from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
-from solvers.SlideShowInjectorSolver import SlideShowInjectorSolver
 from constants import DatasetLetter
 from solvers.CombiningSolver import CombiningSolver
+
 # import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
-
-    while(True):
+    while (True):
         scores = []
         for dataset_letter in DatasetLetter.D:
 
