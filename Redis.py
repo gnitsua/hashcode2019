@@ -23,7 +23,10 @@ class Redis():
             self.save()  # since this is a big change, make sure it's saved
 
     def remove_dataset(self, dataset_letter):
-        pass
+        pipe = self.r.pipeline()
+        for key in self.r.scan_iter(match=dataset_letter + "*"):
+            pipe.delete(key)
+        pipe.execute()
 
     def get_unused_images(self, dataset_letter):
         return self.r.smembers(RedisKey.unused_images_container(dataset_letter))
@@ -125,8 +128,8 @@ class Redis():
         pipe = self.r.pipeline()
         for image_id in self.r.smembers(slide_show_key):
             pipe.smove(slide_show_key, RedisKey.unused_images_container(dataset_letter), image_id)
-        pipe.delete(RedisKey.slide_container(dataset_letter,slide_show_id))
-        pipe.zrem(RedisKey.score_container(dataset_letter),RedisKey.slide_show(dataset_letter,slide_show_id))
+        pipe.delete(RedisKey.slide_container(dataset_letter, slide_show_id))
+        pipe.zrem(RedisKey.score_container(dataset_letter), RedisKey.slide_show(dataset_letter, slide_show_id))
         pipe.execute()
 
     def intersect_slide_shows(self, slide_show_id_1, slide_show_id_2):
@@ -144,12 +147,6 @@ class Redis():
             if (len(self.intersect_slide_shows(slide_show_key, set)) > 0):
                 result.append(set[5:])  # TODO: converting key back to id
         return result
-
-    def flush_associated_keys(self, dataset_letter):
-        pipe = self.r.pipeline()
-        for key in self.r.scan_iter(match=dataset_letter + "*"):
-            pipe.delete(key)
-        pipe.execute()
 
     def save(self):
         self.r.bgsave()

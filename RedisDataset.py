@@ -28,7 +28,7 @@ class RedisDataset(object, Dataset):
         self.r.add_dataset(self)
 
     def remove(self):
-        self.r.flush_associated_keys(self.dataset_letter)
+        self.r.remove_dataset(self.dataset_letter)
 
     def slide_shows(self):
         return self.r.get_all_slide_shows(self.dataset_letter)
