@@ -5,9 +5,12 @@ from errors import ImageInSlideshowError
 
 
 class SlideShow():
-    def __init__(self, dataset_letter):
+    def __init__(self, dataset_letter, id=None):
         self.dataset_letter = dataset_letter
-        self.id = str(uuid.uuid4())
+        if (id == None):
+            self.id = str(uuid.uuid4())
+        else:
+            self.id = id
 
         self.internal_score = 0
         self.slides = []
@@ -32,15 +35,15 @@ class SlideShow():
         # check if it can be added
         for image in slide:
             if image in self.images:
-                raise (ImageInSlideshowError("{} already in slideshow".format(image.id)))
+                raise (ImageInSlideShowError("{} already in slideshow".format(image.id)))
 
         # if so add
         self.slides.append(slide)
         for image in slide:
             self.images.add(image)
 
-        if (len(self.slides) > 1):
-            self.internal_score += self.slides[-1] - self.slides[-2]
+            if(len(self.slides) > 1):
+                self.internal_score += self.slides[-1]-self.slides[-2]
 
     def pop(self):
         for image in self.slides[-1]:

@@ -8,6 +8,8 @@ class Slide():
         self.image1 = image1
         self.image2 = image2
         if (self.image2 != None):
+            if (self.image1 == self.image2):
+                raise AttributeError("Invalid slide configuration")
             if (self.image1.orientation == Orientation.vertical and self.image2.orientation == Orientation.vertical):
                 pass
             else:
