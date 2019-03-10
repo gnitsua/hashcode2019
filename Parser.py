@@ -28,7 +28,7 @@ class Parser():
             if line_no < InputFile.lines_to_skip:
                 continue
 
-            id, orientation, tags = Parser.parse_line(line_no, line)
+            id, orientation, _, tags = Parser.parse_line(line_no, line)
 
             image = Image(id, orientation, tags)
             images.append(image)
@@ -45,10 +45,17 @@ class Parser():
 
         id = line_no - InputFile.lines_to_skip
         orientation = data[0]
-        number_of_tags = data[1]
+        number_of_tags = int(data[1])
         tags = data[2:]
 
-        return id, orientation, tags
+        return id, orientation, number_of_tags, tags
+
+    @staticmethod
+    def reconstruct_line(orientation, number_of_tags, tags):
+        number_of_tags = str(number_of_tags)
+        tags = ' '.join(tags)
+
+        return '{} {} {}\n'.format(orientation, number_of_tags, tags)
 
     @staticmethod
     def parse(data_set_letter):
