@@ -13,8 +13,10 @@ class Orientation:
 
 class FilePath:
     data = '/data_sets/'
+    sorted_data = data + 'sorted/'
     results = '/results/'
     pwd = os.path.dirname(os.path.realpath(__file__))
+    config = pwd + '/config.json'
 
 
 class InputFile:
@@ -32,7 +34,7 @@ class DatasetLetter(Enum):
     E = "e"
 
 
-with open('config.json', 'r') as f:
+with open(FilePath.config, 'r') as f:
     config = json.load(f)
 
 REDIS_HOST = config["REDIS_HOST"]
