@@ -6,6 +6,7 @@ from Dataset import Dataset
 from Slide import Slide
 from constants import Orientation
 from slideshow import SlideShow
+from numba import jit
 
 
 def score(set1, set2):
@@ -118,7 +119,7 @@ def solve1(Hs, vertical_images, dataset_letter):
 
     random.seed()
 
-    Vs = generateVslides(vertical_images, 500)
+    Vs = generateVslides(vertical_images, 10)
     if len(Hs) != 0:
         start = random.sample(Hs, 1)[0]  # VARY ME (?)
         Hs.remove(start)
@@ -142,7 +143,7 @@ def solve1(Hs, vertical_images, dataset_letter):
         SCOREX = SCOREXinit
         attempts = 0
         score_before = solution.get_score()
-        Vs = generateVslides(vertical_images,500)
+        Vs = generateVslides(vertical_images,10 )
         while True:
             if(random.randint(0,num_allSlidesPossible) < num_horizontal or num_vertical < 1):#do a horizontal
                 B = random.sample(Hs, 1)[0]  # pick a random slide
@@ -153,9 +154,7 @@ def solve1(Hs, vertical_images, dataset_letter):
 
 
             # B = random.sample(allSlidesPossible, 1)[0]  # pick a random slide
-            before = solution.get_score()
             solution.add_slide(B)  # add it to the slideshow
-            during = solution.get_score()
             if (solution.get_score() - score_before < SCOREX):  # the increase in score is not enough to keep this slide
                 if attempts < ATTEMPTSX:
                     attempts += 1
@@ -190,7 +189,7 @@ def solve1(Hs, vertical_images, dataset_letter):
 if __name__ == "__main__":
 
     ##### READ DATA #####
-    dataset_letter = "d"
+    dataset_letter = "c"
     dataset = Dataset(dataset_letter)
     print "Read ", len(dataset.images), " lines from data file: ", dataset_letter
 
