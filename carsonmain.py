@@ -128,7 +128,7 @@ def solve1(Hs, vertical_images, dataset_letter):
     solution = SlideShow(dataset_letter)
     # solution = [count]
     total = 0
-    SCOREXinit = 10  # VARY ME
+    SCOREXinit = 1  # VARY ME
 
     random.seed()
 
@@ -151,7 +151,7 @@ def solve1(Hs, vertical_images, dataset_letter):
         num_allSlidesPossible = num_horizontal + num_vertical
         if(num_allSlidesPossible < 1):
             break
-        ATTEMPTSX = 500  # VARY ME, large effect on score and time
+        ATTEMPTSX = 50  # VARY ME, large effect on score and time
         SCOREX = SCOREXinit
         attempts = 0
         score_before = solution.get_score()
@@ -176,6 +176,7 @@ def solve1(Hs, vertical_images, dataset_letter):
 
 
             else:  # we found our next slide
+                verticals_images_tried = {}
                 break
 
         if(orientation == Orientation.horizontal):
@@ -200,7 +201,7 @@ def solve1(Hs, vertical_images, dataset_letter):
 if __name__ == "__main__":
 
     ##### READ DATA #####
-    dataset_letter = "c"
+    dataset_letter = "e"
     dataset = Dataset(dataset_letter)
     print "Read ", len(dataset.images), " lines from data file: ", dataset_letter
 
