@@ -6,7 +6,6 @@ from Dataset import Dataset
 from Slide import Slide
 from constants import Orientation
 from slideshow import SlideShow
-from numba import jit
 
 
 def score(set1, set2):
@@ -75,13 +74,27 @@ def parseFile(filename):
     return data
 
 
-
-def generateVslides(vertical_images,num):
-    if(num > len(vertical_images)):
+def get_combinations(vertical_images,num):
+    if (num > len(vertical_images)):
         sample = len(vertical_images)
     else:
         sample = num
-    return set(map(lambda tuple: Slide(tuple[0], tuple[1]), itertools.combinations(random.sample(vertical_images,sample), 2)))
+    return itertools.combinations(random.sample(vertical_images, sample),2)
+
+def tuples_to_slides(tuples):
+    return set(map(lambda tuple: Slide(tuple[0], tuple[1]), tuples))
+
+verticals_images_tried = {}
+
+def generateVslide(vertical_images):
+    while(True):
+        images = random.sample(vertical_images,2)
+        if(images[0] in verticals_images_tried or images[1] in verticals_images_tried):
+            pass
+        else:
+            verticals_images_tried[images[0].__hash__()] = True
+            verticals_images_tried[images[1].__hash__()] = True
+            return Slide(images[0],images[1])
 
 
 # def generateRandomVSlides(Vs):
@@ -115,16 +128,15 @@ def solve1(Hs, vertical_images, dataset_letter):
     solution = SlideShow(dataset_letter)
     # solution = [count]
     total = 0
-    SCOREXinit = 5  # VARY ME
+    SCOREXinit = 10  # VARY ME
 
     random.seed()
 
-    Vs = generateVslides(vertical_images, 10)
     if len(Hs) != 0:
         start = random.sample(Hs, 1)[0]  # VARY ME (?)
         Hs.remove(start)
     else:
-        start = random.sample(Vs, 1)[0]
+        start = generateVslide(vertical_images)
         vertical_images.remove(start.image1)
         vertical_images.remove(start.image2)
 
@@ -139,17 +151,16 @@ def solve1(Hs, vertical_images, dataset_letter):
         num_allSlidesPossible = num_horizontal + num_vertical
         if(num_allSlidesPossible < 1):
             break
-        ATTEMPTSX = num_allSlidesPossible  # VARY ME, large effect on score and time
+        ATTEMPTSX = 500  # VARY ME, large effect on score and time
         SCOREX = SCOREXinit
         attempts = 0
         score_before = solution.get_score()
-        Vs = generateVslides(vertical_images,10 )
         while True:
             if(random.randint(0,num_allSlidesPossible) < num_horizontal or num_vertical < 1):#do a horizontal
                 B = random.sample(Hs, 1)[0]  # pick a random slide
                 orientation = Orientation.horizontal
             else: #do a vertical
-                B = random.sample(Vs, 1)[0]  # pick a random slide
+                B = generateVslide(vertical_images)  # pick a random slide
                 orientation = Orientation.vertical
 
 
