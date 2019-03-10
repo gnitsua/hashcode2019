@@ -1,11 +1,20 @@
-from ortools.constraint_solver import pywrapcp
+from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
-
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 class GoogleORTools(IncrementalImprovementSolver):
+    CHUNK_SIZE = 1000
     def __init__(self, dataset):
         IncrementalImprovementSolver.__init__(self, dataset)
+
+    @staticmethod
+    def CreateDistanceCallback(slide_array):
+        def dist_callback(from_node, to_node):
+            return 100-(slide_array[from_node] - slide_array[to_node])
+
+        return dist_callback
 
     def optimize(self, slide_array):
         tsp_size = len(slide_array)
@@ -16,10 +25,10 @@ class GoogleORTools(IncrementalImprovementSolver):
         routing = pywrapcp.RoutingModel(tsp_size, num_routes, depot)
         # initial_assignment = routing.ReadAssignmentFromRoutes(initial_routes, True)
         search_parameters = pywrapcp.RoutingModel.DefaultSearchParameters()
-        # search_parameters.time_limit_ms = 10000
-        # search_parameters.optimization_step = 1000
-        # search_parameters.first_solution_strategy = (
-        #     routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        search_parameters.time_limit_ms = 10000
+        search_parameters.optimization_step = 100
+        search_parameters.log_search = True
+        # search_parameters.use_light_propagation = False
         # search_parameters.local_search_metaheuristic = (
         #     routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
         distance_callback = self.CreateDistanceCallback(slide_array)

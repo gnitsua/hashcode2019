@@ -15,7 +15,7 @@ class RedisScoreboardMoniter():
             for dataset_letter_class in list(DatasetLetter):
                 dataset_letter = dataset_letter_class.value
                 print("Scores for {}".format(RedisKey.score_container(dataset_letter)))
-                top_five = self.r.get_scoreboard(dataset_letter, 0, 5)
+                top_five = self.r.get_scoreboard(dataset_letter)
                 if (len(top_five) > 0):
                     for rank, score in enumerate(top_five):
                         print(str(rank + 1) + ". " + score[0] + "(" + str(score[1]) + ")")
