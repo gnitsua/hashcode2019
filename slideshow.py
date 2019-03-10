@@ -42,8 +42,8 @@ class SlideShow():
         for image in slide:
             self.images.add(image)
 
-            if(len(self.slides) > 1):
-                self.internal_score += self.slides[-1]-self.slides[-2]
+        if(len(self.slides) > 1):
+            self.internal_score += self.slides[-1]-self.slides[-2]
 
     def pop(self):
         for image in self.slides[-1]:
