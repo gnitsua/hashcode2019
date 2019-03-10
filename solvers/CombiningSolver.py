@@ -1,9 +1,9 @@
 from ImageInSlideshowError import ImageInSlideshowError
 from slideshow import SlideShow
-from solvers.BaseSolver import Solver
+from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
 
 
-class CombiningSolver(Solver):
+class CombiningSolver(IncrementalImprovementSolver):
 
     def solve(self):
         ss1 = self.get_solution_to_work_on()
@@ -22,5 +22,4 @@ class CombiningSolver(Solver):
             except ImageInSlideshowError as e:
                 print e
 
-        self.validate(ss)
         return ss

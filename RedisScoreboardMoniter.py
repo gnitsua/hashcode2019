@@ -19,7 +19,7 @@ class RedisScoreboardMoniter():
                 if (len(top_five) > 0):
                     for rank, score in enumerate(top_five):
                         print(str(rank + 1) + ". " + score[0] + "(" + str(score[1]) + ")")
-                    top_score += top_five[0][1]
+                        top_score += score[1]
                     self.write_top_scores_to_file(dataset_letter, top_five[0][0], top_five[0][1])
                 else:
                     print("no scores yet")

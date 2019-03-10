@@ -24,6 +24,9 @@ class Image(object):
     def __sub__(self, other):
         return self.tags - other.tags
 
+    def __add__(self, other):
+        return self.tags | other.tags
+
     def __hash__(self):
         return self.id
 
