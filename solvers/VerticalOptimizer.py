@@ -6,7 +6,7 @@ from solvers.IncrementalImprovementSolver import IncrementalImprovementSolver
 
 
 class VerticalOptimizer(IncrementalImprovementSolver):
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 5000
     def optimize(self, slide_array):
 
         # strip all vertical slides of

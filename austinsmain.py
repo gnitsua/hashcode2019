@@ -1,6 +1,5 @@
 import time
 
-from Dataset import Dataset
 from RedisDataset import RedisDataset
 from constants import DatasetLetter, REDIS_HOST, REDIS_PASWORD
 from solvers.VerticalOptimizer import VerticalOptimizer
@@ -11,23 +10,22 @@ if __name__ == "__main__":
 
     while (True):
         scores = []
-        for dataset_letter in [DatasetLetter.D]:
+        for dataset_letter in [DatasetLetter.D, DatasetLetter.E]:
 
             # dataset = Dataset(dataset_letter.name.lower())
             dataset = RedisDataset(dataset_letter.name.lower(), REDIS_HOST, REDIS_PASWORD, start_fresh=False)
 
             solver = VerticalOptimizer(dataset)
-            while (True):
-                # try:
-                    ss = solver.solve()
-                    dataset.upload(ss)
-                    break
-                # except AttributeError as e:
-                #     print("redis rejected solution {}".format(e.message))
-
-            if (ss != None):
-                scores.append(ss.get_score())
+            try:
+                ss = solver.solve()
                 ss.save_to_file()
+                dataset.upload(ss)
+                if (ss != None):
+                    scores.append(ss.get_score())
+                    ss.save_to_file()
+            except AttributeError as e:
+                print("redis rejected solution {}".format(e.message))
+
 
 
         total = 0
