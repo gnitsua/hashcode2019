@@ -38,7 +38,9 @@ class Slide():
         return result
 
     def __sub__(self, other):
+
         common_tags = len(self.tags.intersection(other.tags))
+
         tags_only_in_1 = len(self.tags) - common_tags
         tags_only_in_2 = len(other.tags) - common_tags
         return min(common_tags, tags_only_in_1, tags_only_in_2)

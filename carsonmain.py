@@ -1,4 +1,5 @@
 import itertools
+import math
 import random
 
 from Dataset import Dataset
@@ -73,22 +74,27 @@ def parseFile(filename):
     return data
 
 
-def generateVslides(vertical_images):
-    return set(map(lambda tuple: Slide(tuple[0], tuple[1]), itertools.combinations(vertical_images, 2)))
+
+def generateVslides(vertical_images,num):
+    if(num > len(vertical_images)):
+        sample = len(vertical_images)
+    else:
+        sample = num
+    return set(map(lambda tuple: Slide(tuple[0], tuple[1]), itertools.combinations(random.sample(vertical_images,sample), 2)))
 
 
-def generateRandomVSlides(Vs):
-    Vint = []
-    random.shuffle(Vs)
-
-    index = 0
-    while index < len(Vs) - 1:
-        i = Vs[index]
-        j = Vs[index + 1]
-        unioned = i[2].union(j[2])
-        Vint.append([set((i, j)), 'V', unioned])
-        index += 2
-    return Vint
+# def generateRandomVSlides(Vs):
+#     Vint = []
+#     random.shuffle(Vs)
+#
+#     index = 0
+#     while index < len(Vs) - 1:
+#         i = Vs[index]
+#         j = Vs[index + 1]
+#         unioned = i[2].union(j[2])
+#         Vint.append([set((i, j)), 'V', unioned])
+#         index += 2
+#     return Vint
 
 
 def remove_all_slides_with_image(image, slides):
@@ -99,7 +105,8 @@ def remove_all_slides_with_image(image, slides):
     return result
 
 
-def solve1(Hs, Vs, allSlidesPossible, dataset_letter):
+def solve1(Hs, vertical_images, dataset_letter):
+    assert(len(vertical_images) % 2 == 0)
     # pick a random H to start with
     # force search until a score >= SCOREX is found
     # add, remove ID, reset SCOREX, and repeat
@@ -110,25 +117,45 @@ def solve1(Hs, Vs, allSlidesPossible, dataset_letter):
     SCOREXinit = 5  # VARY ME
 
     random.seed()
+
+    Vs = generateVslides(vertical_images, 500)
     if len(Hs) != 0:
         start = random.sample(Hs, 1)[0]  # VARY ME (?)
         Hs.remove(start)
     else:
         start = random.sample(Vs, 1)[0]
-        Vs.remove(start)
+        vertical_images.remove(start.image1)
+        vertical_images.remove(start.image2)
 
     solution.add_slide(start)
-    allSlidesPossible = remove_all_slides_with_image(start.image1, allSlidesPossible)
-    allSlidesPossible = remove_all_slides_with_image(start.image2, allSlidesPossible)
 
-    while len(allSlidesPossible) > 0:
-        ATTEMPTSX = len(allSlidesPossible)  # VARY ME, large effect on score and time
+    while True:
+        num_horizontal = len(Hs)
+        if(len(vertical_images)>1):
+            num_vertical = math.factorial(len(vertical_images)) / math.factorial(len(vertical_images) - 2)
+        else:
+            num_vertical = len(vertical_images)
+        num_allSlidesPossible = num_horizontal + num_vertical
+        if(num_allSlidesPossible < 1):
+            break
+        ATTEMPTSX = num_allSlidesPossible  # VARY ME, large effect on score and time
         SCOREX = SCOREXinit
         attempts = 0
         score_before = solution.get_score()
+        Vs = generateVslides(vertical_images,500)
         while True:
-            B = random.sample(allSlidesPossible, 1)[0]  # pick a random slide
+            if(random.randint(0,num_allSlidesPossible) < num_horizontal or num_vertical < 1):#do a horizontal
+                B = random.sample(Hs, 1)[0]  # pick a random slide
+                orientation = Orientation.horizontal
+            else: #do a vertical
+                B = random.sample(Vs, 1)[0]  # pick a random slide
+                orientation = Orientation.vertical
+
+
+            # B = random.sample(allSlidesPossible, 1)[0]  # pick a random slide
+            before = solution.get_score()
             solution.add_slide(B)  # add it to the slideshow
+            during = solution.get_score()
             if (solution.get_score() - score_before < SCOREX):  # the increase in score is not enough to keep this slide
                 if attempts < ATTEMPTSX:
                     attempts += 1
@@ -136,69 +163,74 @@ def solve1(Hs, Vs, allSlidesPossible, dataset_letter):
                     SCOREX = SCOREX - 1
                     attempts = 0  # COULD GO IN ORDER, WHEN CONTINUING, KEEP GOING IN A CIRCLE TO ALLOW FOR A HIGHER SCORE TO REAPPEAR
                 solution.pop()  # so go back a step
+
+
             else:  # we found our next slide
                 break
 
-        allSlidesPossible = remove_all_slides_with_image(B.image1, allSlidesPossible)
-        allSlidesPossible = remove_all_slides_with_image(B.image2, allSlidesPossible)
+        if(orientation == Orientation.horizontal):
+            Hs.remove(solution.slides[-1])
+        else:
+            last_slide = solution.slides[-1]
+            vertical_images.remove(last_slide.image1)
+            vertical_images.remove(last_slide.image2)
+
+        # allSlidesPossible = remove_all_slides_with_image(B.image1, allSlidesPossible)
+        # allSlidesPossible = remove_all_slides_with_image(B.image2, allSlidesPossible)
         if count % 100 == 0:
             if ATTEMPTSX != 0:
-                print solution.get_score(), " / #", count, " / ", len(allSlidesPossible), " left / ", 100 * (
-                            float(attempts) / float(ATTEMPTSX)), "% tried"
+                print solution.get_score(), " / #", count, " / ", num_allSlidesPossible, " left / ", 100 * (
+                            float(attempts) / num_allSlidesPossible), "% tried"
 
         count+=1
 
-    return solution.get_score(), solution
+    return solution
 
 
 if __name__ == "__main__":
 
     ##### READ DATA #####
-    # fn = "a_example.txt"
-    # fn = "b_lovely_landscapes.txt" # all horizontal
-    fn = "c_memorable_moments.txt"
-    dataset_letter = "c"
-    # fn = "d_pet_pictures.txt"
-    # fn = "e_shiny_selfies.txt"
-    datafile = "data_sets/" + fn
-
+    dataset_letter = "d"
     dataset = Dataset(dataset_letter)
-    print "Read ", len(dataset.images), " lines from data file: ", datafile
+    print "Read ", len(dataset.images), " lines from data file: ", dataset_letter
 
     ##### SEPARATE RAW DATA INTO Vs and Hs #####
-    Vs = set()
+    vertical_images = set()
     Hs = set()
     for i in dataset.images:
         if i.orientation == Orientation.vertical:
-            Vs.add(i)
+            vertical_images.add(i)
         else:
             Hs.add(Slide(i))
 
-    VIDs = [item.id for item in Vs]
+    # VIDs = [item.id for item in vertical_images]
 
     ##### GENERATE ALL POSSIBLE VERTICALS #####
-    print "Generating verticals from ", len(Vs), " vertical pictures"
+    # print "Generating verticals from ", len(vertical_images), " vertical pictures"
 
-    print "Generating ALL..."
-    Vint = generateVslides(Vs)  # okay for low numbers of verticals, 500 works
+    # print "Generating ALL..."
+    # Vint = generateVslides(Vs,500)  # okay for low numbers of verticals, 500 works
     # OR VARY
     # print "Generating randoms..."
     # Vint = generateRandomVSlides(Vs)
 
-    print "Calculated vertical combos... (", len(Vint), ")"
+    # print "Calculated vertical combos... (", len(Vint), ")"
     # Vint is a list of all possible vertical combos (aka slides) [{ID1, ID2}, # of tags combined, tags combined] #=3
     # Hs is still a list of horizontal photos (aka slides) [ID, H, tags] #=3
 
-    allSlidesPossible = Hs | Vint  # union
-    print "All possible slides = ", len(allSlidesPossible)
+    # allSlidesPossible = Hs | Vint  # union
+    allSlidesPossible = Hs
+    print "All possible slides = ", len(allSlidesPossible) + (len(vertical_images)/2)
     print len(Hs), "horizontals"
-    print len(Vint), "vertical combinations"
+    print (len(vertical_images)/2, "vertical combinations")
 
-    total, solution = solve1(Hs, Vint, allSlidesPossible, dataset_letter)
+    solution = solve1(Hs, vertical_images, dataset_letter)
 
     print "Solution complete... "
-    print "Number of slides: ", len(solution.slides) - 1
-    print "Score: ", total
+    print "Number of slides: ", len(solution.slides)
+    print "Score: ", solution.get_score()
+
+    print(solution.slides)
 
     solution.save_to_file()
 
