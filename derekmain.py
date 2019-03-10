@@ -5,7 +5,7 @@ from solvers import Solver5 as Solver
 solver_name = 'solver5'
 
 # input_keys = ['a', 'b', 'c', 'd', 'e']
-input_keys = ['c']
+input_keys = ['e']
 
 for input_key in input_keys:
     lines = Parser.get_lines(input_key)

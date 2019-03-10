@@ -11,10 +11,12 @@ from slideshow import SlideShow
 
 
 
-# TODO: This is working but I need to pick a line that has n number
-#       of similar tags instead of just grabbing the first line with
-#       a similar tag.
-
+"""
+TODO:
+ - sort dataset by number of tags
+ - pick a vertical that doesn't share tags with it's partner
+ - create solution6 that leverages solution5 with multiple processes
+"""
 
 class Solver5(Solver):
     """
@@ -33,14 +35,7 @@ class Solver5(Solver):
         self.images, text = parse_string(self.lines)
         regexer = Regexer(text)
 
-        # Use the first horizontal image as first page
-        line = regexer.get_line(i=self.used_images, o=Orientation.horizontal)
-
-        image = self.get_and_use_image(regexer, line)
-        tags = image.tags
-
-        slide = Slide(image)
-        slideshow.add_slide(slide)
+        tags = []
 
         tic = None
         for x in range(100000):
@@ -51,12 +46,7 @@ class Solver5(Solver):
                 tic = dt.datetime.now()
                 print x, '\t',
 
-            # Try to find an image with tag
-            tags = [tags.pop()] if tags else []
-
-            line = regexer.get_line_with_tags(tags, self.used_images)
-            if line is None:
-                line = regexer.get_line(self.used_images)
+            line = self.get_similar_line(regexer, tags)
             if line is None:
                 break
 
@@ -67,7 +57,7 @@ class Solver5(Solver):
 
             if image.orientation == Orientation.vertical:
                 # Get another vertical image
-                line = regexer.get_line(i=self.used_images, o=Orientation.vertical)
+                line = regexer.get_line(o=Orientation.vertical)
                 if line is None:
                     continue
                 image = self.get_and_use_image(regexer, line)
@@ -105,6 +95,25 @@ class Solver5(Solver):
         # print self.used_images
         self.used_images += str
 
+    def get_similar_line(self, regexer, tags):
+        tag_minimum = int(math.ceil(len(tags) / 4.0))
+
+        # Attempt to get a line with similar tags
+        while tag_minimum > 0:
+            line = regexer.get_line(t=tags, tm=tag_minimum)
+
+            if line:
+                # print tag_minimum, '/', int(math.ceil(len(tags) / 3.0))
+                return line
+
+            # No line found, loosen our requirements
+            tag_minimum -= 1
+
+        # Unable to find similar line, get random line
+        # Or if there are no lines left, return None
+        line = regexer.get_line()
+        # print 'random line'
+        return line
 
 # Utility functions
 def parse_string(lines):
@@ -123,7 +132,10 @@ def parse_string(lines):
         image = Image(id, orientation, tags)
         images.append(image)
 
-        formatted_line = 'id:{} o:{} {}'.format(id, orientation, '-'.join(tags))
+        tags.sort()
+
+        # Note: dash at end of tag to match regex
+        formatted_line = 'id:{} o:{} -{}-'.format(id, orientation, '--'.join(tags))
         formatted_lines.append(formatted_line)
 
     formatted_string = '\n'.join(formatted_lines)
@@ -140,11 +152,12 @@ def get_tag_subset(tags, number_of_tags=None):
         count = number_of_tags if number_of_tags <= len(tag_list) else len(tag_list)
     else:
         # Custom logic
-        count = math.floor(len(tag_list) / 2.0)
+        count = int(math.floor(len(tag_list) / 2.0))
+        # count = len(tag_list)
 
     slice = tag_list[:count]
 
-    return slice
+    return count, slice
 
 
 class Regexer():
@@ -158,7 +171,7 @@ class Regexer():
         match = re.search(Regexer.ID, line)
         return match.group(1)
 
-    def get_line(self, i=None, o=None, t=None):
+    def get_line(self, i=None, o=None, t=None, tm=1):
         if i:
             id = r'id:(?!{})\d*'.format(i)
         else:
@@ -171,8 +184,8 @@ class Regexer():
             orientation = r'o:.'
 
         if t:
-            # TODO: logic for tags
-            pass
+            tag_options = r'(-{}-)'.format('-|-'.join(t))
+            tags = r'.*?'.join(tm * [tag_options])
         else:
             tags = r'.+'
 
