@@ -25,7 +25,7 @@ class Solver5(Solver):
         regexer = Regexer(text)
 
         # Use the first horizontal image as first page
-        line = regexer.get_line(Orientation.horizontal)
+        line = regexer.get_line(i=self.used_images, o=Orientation.horizontal)
 
         image = self.get_and_use_image(line)
         tags = image.tags
@@ -51,7 +51,7 @@ class Solver5(Solver):
 
             if image.orientation == Orientation.vertical:
                 # Get another vertical image
-                line = regexer.get_line(Orientation.vertical)
+                line = regexer.get_line(i=self.used_images, o=Orientation.vertical)
                 if line is None:
                     continue
                 image = self.get_and_use_image(line)
@@ -59,9 +59,9 @@ class Solver5(Solver):
                 image = None
 
             images.append(image)
-
+            print images
             # Generate tags for this slide
-            tags = set().union(*[i for i in images if i])
+            tags = set().union(*[i.tags for i in images if i])
 
             slide = Slide(*images)
             slideshow.add_slide(slide)
@@ -80,6 +80,7 @@ class Solver5(Solver):
         else:
             str = '{}'.format(id)
 
+        print self.used_images
         self.used_images += str
 
 
@@ -100,10 +101,10 @@ def parse_string(lines):
         image = Image(id, orientation, tags)
         images.append(image)
 
-        formatted_line = '{} o:{} {}'.format(id, orientation, '-'.join(tags))
+        formatted_line = 'id:{} o:{} {}'.format(id, orientation, '-'.join(tags))
         formatted_lines.append(formatted_line)
 
-    formatted_string = ''.join(formatted_lines)
+    formatted_string = '\n'.join(formatted_lines)
 
     return images, formatted_string
 
@@ -119,7 +120,7 @@ def get_tag_subset(tags, number_of_tags=1):
 
 
 class Regexer():
-    ID = r'(\d*)'
+    ID = r'id:(\d*)'
 
     def __init__(self, text=''):
         self.text = text
@@ -127,10 +128,13 @@ class Regexer():
     @staticmethod
     def get_id(line):
         match = re.search(Regexer.ID, line)
-        return match.group()
+        return match.group(1)
 
-    def get_line(self, o=None, t=None):
-        id = self.ID
+    def get_line(self, i=None, o=None, t=None):
+        if i:
+            id = r'id:(?!{})\d*'.format(i)
+        else:
+            id = r'id:\d*'
 
         if o:
             abbreviation = 'H' if o == Orientation.horizontal else 'V'
@@ -139,7 +143,7 @@ class Regexer():
             orientation = r'o:.'
 
         if t:
-            # logic for tags
+            # TODO: logic for tags
             pass
         else:
             tags = r'.+'
@@ -151,15 +155,15 @@ class Regexer():
 
 
     def get_random_line(self, used_lines):
-        exclude_lines = r'^(?!{})'.format(used_lines)
+        exclude_lines = r'id:(?!{}).*'.format(used_lines)
         match = re.search(exclude_lines, self.text)
 
         return match and match.group()
 
 
     def get_line_with_tags(self, tags, used_lines):
-        exclude_lines = r'^(?!{})'.format(used_lines)
-        include_tags = ''.join(r'(?=.*{})'.format(t) for t in tags)
+        exclude_lines = r'id:(?!{})'.format(used_lines)
+        include_tags = ''.join(r'(?=.*{}).*'.format(t) for t in tags)
         regex = exclude_lines + include_tags
 
         match = re.search(regex, self.text)
