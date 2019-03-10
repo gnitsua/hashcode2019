@@ -1,10 +1,19 @@
+import datetime as dt
+import math
+import re
+
 from BaseSolver import Solver
-from slideshow import SlideShow
+from Parser import Parser
 from Slide import Slide
 from constants import Orientation
-from Parser import Parser
 from image import Image
-import re
+from slideshow import SlideShow
+
+
+
+# TODO: This is working but I need to pick a line that has n number
+#       of similar tags instead of just grabbing the first line with
+#       a similar tag.
 
 
 class Solver5(Solver):
@@ -27,24 +36,31 @@ class Solver5(Solver):
         # Use the first horizontal image as first page
         line = regexer.get_line(i=self.used_images, o=Orientation.horizontal)
 
-        image = self.get_and_use_image(line)
+        image = self.get_and_use_image(regexer, line)
         tags = image.tags
 
         slide = Slide(image)
         slideshow.add_slide(slide)
 
-        for x in range(1000):
+        tic = None
+        for x in range(100000):
+            if x % 400 == 0:
+                if tic:
+                    toc = dt.datetime.now()
+                    print toc - tic
+                tic = dt.datetime.now()
+                print x, '\t',
+
             # Try to find an image with tag
             tags = [tags.pop()] if tags else []
 
             line = regexer.get_line_with_tags(tags, self.used_images)
             if line is None:
-                line = regexer.get_random_line(self.used_images)
+                line = regexer.get_line(self.used_images)
             if line is None:
                 break
 
-
-            image = self.get_and_use_image(line)
+            image = self.get_and_use_image(regexer, line)
 
             images = []
             images.append(image)
@@ -54,12 +70,13 @@ class Solver5(Solver):
                 line = regexer.get_line(i=self.used_images, o=Orientation.vertical)
                 if line is None:
                     continue
-                image = self.get_and_use_image(line)
+                image = self.get_and_use_image(regexer, line)
             else:
                 image = None
 
             images.append(image)
-            print images
+            # print images
+
             # Generate tags for this slide
             tags = set().union(*[i.tags for i in images if i])
 
@@ -68,19 +85,24 @@ class Solver5(Solver):
 
         return slideshow
 
-    def get_and_use_image(self, line):
+    def get_and_use_image(self, regexer, line):
         # Takes in a line and does all the necessary stuff
+
+        regexer.remove_line(line)
+
         id = Regexer.get_id(line)
-        self.add_to_used_images(id)
+        # self.add_to_used_images(id)
         return self.images[int(id)]
 
     def add_to_used_images(self, id):
+        # Note: The space after id (ie. '{} ') is so that it only matches that number
+        #       not any numbers that start with the ids
         if self.used_images:
-            str = '|{}'.format(id)
+            str = '|{} '.format(id)
         else:
-            str = '{}'.format(id)
+            str = '{} '.format(id)
 
-        print self.used_images
+        # print self.used_images
         self.used_images += str
 
 
@@ -108,12 +130,18 @@ def parse_string(lines):
 
     return images, formatted_string
 
-def get_tag_subset(tags, number_of_tags=1):
+
+def get_tag_subset(tags, number_of_tags=None):
     # Returns a set number of tags, if there aren't enough tags available,
     # just return them all
     tag_list = list(tags)
 
-    count = number_of_tags if number_of_tags <= len(tag_list) else len(tag_list)
+    if number_of_tags:
+        count = number_of_tags if number_of_tags <= len(tag_list) else len(tag_list)
+    else:
+        # Custom logic
+        count = math.floor(len(tag_list) / 2.0)
+
     slice = tag_list[:count]
 
     return slice
@@ -153,13 +181,11 @@ class Regexer():
 
         return match and match.group()
 
-
     def get_random_line(self, used_lines):
         exclude_lines = r'id:(?!{}).*'.format(used_lines)
         match = re.search(exclude_lines, self.text)
 
         return match and match.group()
-
 
     def get_line_with_tags(self, tags, used_lines):
         exclude_lines = r'id:(?!{})'.format(used_lines)
@@ -169,3 +195,7 @@ class Regexer():
         match = re.search(regex, self.text)
 
         return match and match.group()
+
+    def remove_line(self, line):
+        r = re.compile(line)
+        self.text = r.sub('', self.text)
